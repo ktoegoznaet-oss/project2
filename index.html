@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ФиброДом — Домокомплекты из фибропенобетонных блоков</title>
+    <meta name="description" content="Производство и продажа домокомплектов из фибропенобетонных блоков со встроенной облицовкой и паз-гребнем. Типовые проекты домов 10×10 м.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Шапка -->
+<header class="header" id="header">
+    <div class="container header__inner">
+        <a href="#" class="logo">
+            <span class="logo__icon">&#9670;</span>
+            <span class="logo__text">ФиброДом</span>
+        </a>
+        <nav class="nav" id="nav">
+            <a href="#advantages" class="nav__link">Преимущества</a>
+            <a href="#catalog" class="nav__link">Домокомплекты</a>
+            <a href="#technology" class="nav__link">Технология</a>
+            <a href="#about" class="nav__link">О нас</a>
+            <a href="#contacts" class="nav__link">Контакты</a>
+        </nav>
+        <a href="tel:+70001234567" class="header__phone">+7 (000) 123-45-67</a>
+        <button class="burger" id="burger" aria-label="Меню">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+
+<!-- Герой -->
+<section class="hero" id="hero">
+    <div class="container hero__inner">
+        <div class="hero__content">
+            <h1 class="hero__title">Домокомплекты из&nbsp;фибропенобетонных блоков</h1>
+            <p class="hero__subtitle">Со встроенной облицовкой и&nbsp;системой «паз-гребень». Собери свой дом как конструктор &mdash; быстро, тепло, надёжно.</p>
+            <div class="hero__actions">
+                <a href="#catalog" class="btn btn--primary">Выбрать домокомплект</a>
+                <a href="#technology" class="btn btn--outline">Узнать о технологии</a>
+            </div>
+            <div class="hero__stats">
+                <div class="stat">
+                    <span class="stat__value">10×10</span>
+                    <span class="stat__label">метров — площадь дома</span>
+                </div>
+                <div class="stat">
+                    <span class="stat__value">от 3 дней</span>
+                    <span class="stat__label">сборка коробки</span>
+                </div>
+                <div class="stat">
+                    <span class="stat__value">50+ лет</span>
+                    <span class="stat__label">срок службы</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero__visual">
+            <div class="hero__house">
+                <svg viewBox="0 0 400 350" class="house-svg">
+                    <!-- Крыша -->
+                    <polygon points="200,30 50,150 350,150" fill="#c0392b" stroke="#a93226" stroke-width="2"/>
+                    <!-- Стена -->
+                    <rect x="80" y="150" width="240" height="170" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="2"/>
+                    <!-- Блоки (паз-гребень) -->
+                    <line x1="80" y1="185" x2="320" y2="185" stroke="#d5dbdb" stroke-width="1"/>
+                    <line x1="80" y1="220" x2="320" y2="220" stroke="#d5dbdb" stroke-width="1"/>
+                    <line x1="80" y1="255" x2="320" y2="255" stroke="#d5dbdb" stroke-width="1"/>
+                    <line x1="80" y1="290" x2="320" y2="290" stroke="#d5dbdb" stroke-width="1"/>
+                    <line x1="200" y1="150" x2="200" y2="185" stroke="#d5dbdb" stroke-width="1"/>
+                    <line x1="140" y1="185" x2="140" y2="220" stroke="#d5dbdb" stroke-width="1"/>
+                    <line x1="260" y1="185" x2="260" y2="220" stroke="#d5dbdb" stroke-width="1"/>
+                    <line x1="200" y1="220" x2="200" y2="255" stroke="#d5dbdb" stroke-width="1"/>
+                    <line x1="140" y1="255" x2="140" y2="290" stroke="#d5dbdb" stroke-width="1"/>
+                    <line x1="260" y1="255" x2="260" y2="290" stroke="#d5dbdb" stroke-width="1"/>
+                    <line x1="200" y1="290" x2="200" y2="320" stroke="#d5dbdb" stroke-width="1"/>
+                    <!-- Дверь -->
+                    <rect x="170" y="250" width="60" height="70" rx="3" fill="#8e6c4f" stroke="#7d5a3c" stroke-width="2"/>
+                    <circle cx="220" cy="290" r="3" fill="#d4a053"/>
+                    <!-- Окна -->
+                    <rect x="100" y="180" width="45" height="40" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="2"/>
+                    <line x1="122" y1="180" x2="122" y2="220" stroke="#85c1e9" stroke-width="1.5"/>
+                    <line x1="100" y1="200" x2="145" y2="200" stroke="#85c1e9" stroke-width="1.5"/>
+                    <rect x="255" y="180" width="45" height="40" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="2"/>
+                    <line x1="277" y1="180" x2="277" y2="220" stroke="#85c1e9" stroke-width="1.5"/>
+                    <line x1="255" y1="200" x2="300" y2="200" stroke="#85c1e9" stroke-width="1.5"/>
+                    <!-- Фундамент -->
+                    <rect x="65" y="320" width="270" height="15" fill="#7f8c8d" stroke="#6c7a7a" stroke-width="1"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Преимущества -->
+<section class="advantages" id="advantages">
+    <div class="container">
+        <h2 class="section-title">Почему фибропенобетонные блоки?</h2>
+        <p class="section-subtitle">Наши блоки со встроенной облицовкой и паз-гребнем объединяют несущую стену, утеплитель и фасадную отделку в&nbsp;одном изделии.</p>
+        <div class="advantages__grid">
+            <div class="advantage-card">
+                <div class="advantage-card__icon">
+                    <svg viewBox="0 0 48 48" width="48" height="48"><rect x="6" y="20" width="36" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><polygon points="24,4 2,20 46,20" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="18" y="30" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                </div>
+                <h3 class="advantage-card__title">Не нужна отделка фасада</h3>
+                <p class="advantage-card__text">Облицовочный слой встроен в блок. Фасад готов сразу после кладки — экономия на штукатурке и навесных системах.</p>
+            </div>
+            <div class="advantage-card">
+                <div class="advantage-card__icon">
+                    <svg viewBox="0 0 48 48" width="48" height="48"><path d="M24 4 L44 24 L24 44 L4 24 Z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M24 14 L34 24 L24 34 L14 24 Z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>
+                </div>
+                <h3 class="advantage-card__title">Система «паз-гребень»</h3>
+                <p class="advantage-card__text">Блоки стыкуются идеально точно. Минимальный расход клея, отсутствие мостиков холода, высокая скорость кладки.</p>
+            </div>
+            <div class="advantage-card">
+                <div class="advantage-card__icon">
+                    <svg viewBox="0 0 48 48" width="48" height="48"><circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M24 10 L24 24 L34 30" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                </div>
+                <h3 class="advantage-card__title">Быстрая сборка</h3>
+                <p class="advantage-card__text">Коробку дома 10×10 м бригада из 3 человек собирает за 3-5 дней. Не нужна тяжёлая техника.</p>
+            </div>
+            <div class="advantage-card">
+                <div class="advantage-card__icon">
+                    <svg viewBox="0 0 48 48" width="48" height="48"><path d="M8 40 Q8 8 24 8 Q40 8 40 40" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M16 40 Q16 18 24 18 Q32 18 32 40" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="36" r="4" fill="currentColor"/></svg>
+                </div>
+                <h3 class="advantage-card__title">Тепло зимой, прохладно летом</h3>
+                <p class="advantage-card__text">Фибропенобетон обеспечивает теплопроводность 0,08–0,12 Вт/(м·К). Стена 300 мм заменяет 1,5 м кирпичной кладки.</p>
+            </div>
+            <div class="advantage-card">
+                <div class="advantage-card__icon">
+                    <svg viewBox="0 0 48 48" width="48" height="48"><path d="M14 44 L14 12 L34 4 L34 36 Z" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="14" y1="20" x2="34" y2="12" stroke="currentColor" stroke-width="1.5"/><line x1="14" y1="28" x2="34" y2="20" stroke="currentColor" stroke-width="1.5"/><line x1="14" y1="36" x2="34" y2="28" stroke="currentColor" stroke-width="1.5"/></svg>
+                </div>
+                <h3 class="advantage-card__title">Прочность с фиброармированием</h3>
+                <p class="advantage-card__text">Полипропиленовая фибра распределена по всему объёму блока. Класс прочности B2.5 — надёжно для 2-3 этажей.</p>
+            </div>
+            <div class="advantage-card">
+                <div class="advantage-card__icon">
+                    <svg viewBox="0 0 48 48" width="48" height="48"><path d="M6 40 L24 8 L42 40 Z" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="24" y1="22" x2="24" y2="32" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="24" cy="36" r="1.5" fill="currentColor"/></svg>
+                </div>
+                <h3 class="advantage-card__title">Огнестойкость REI 150</h3>
+                <p class="advantage-card__text">Фибропенобетон — негорючий материал класса НГ. Выдерживает воздействие открытого огня более 2,5 часов.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Каталог -->
+<section class="catalog" id="catalog">
+    <div class="container">
+        <h2 class="section-title">Типовые домокомплекты</h2>
+        <p class="section-subtitle">Готовые комплекты стеновых фибропенобетонных блоков для строительства дома 10×10&nbsp;м. В стоимость входят все стеновые блоки с облицовкой и паз-гребнем, перемычки и подробная инструкция по сборке.</p>
+
+        <div class="catalog__grid">
+            <!-- Одноэтажный дом -->
+            <div class="product-card" data-product="one-story">
+                <div class="product-card__badge">Хит продаж</div>
+                <div class="product-card__image">
+                    <svg viewBox="0 0 400 280" class="product-svg">
+                        <rect x="0" y="0" width="400" height="280" fill="#f0f4f8" rx="8"/>
+                        <!-- Земля -->
+                        <rect x="0" y="240" width="400" height="40" fill="#a8d5a2" rx="0"/>
+                        <!-- Фундамент -->
+                        <rect x="60" y="225" width="280" height="18" fill="#7f8c8d" rx="2"/>
+                        <!-- Стена -->
+                        <rect x="75" y="130" width="250" height="95" fill="#ecf0f1" stroke="#ccd1d1" stroke-width="1.5"/>
+                        <!-- Блоки -->
+                        <line x1="75" y1="155" x2="325" y2="155" stroke="#dde1e1" stroke-width="0.8"/>
+                        <line x1="75" y1="180" x2="325" y2="180" stroke="#dde1e1" stroke-width="0.8"/>
+                        <line x1="75" y1="205" x2="325" y2="205" stroke="#dde1e1" stroke-width="0.8"/>
+                        <line x1="200" y1="130" x2="200" y2="155" stroke="#dde1e1" stroke-width="0.8"/>
+                        <line x1="137" y1="155" x2="137" y2="180" stroke="#dde1e1" stroke-width="0.8"/>
+                        <line x1="262" y1="155" x2="262" y2="180" stroke="#dde1e1" stroke-width="0.8"/>
+                        <!-- Крыша -->
+                        <polygon points="200,55 45,135 355,135" fill="#c0392b" stroke="#a93226" stroke-width="1.5"/>
+                        <!-- Дверь -->
+                        <rect x="180" y="175" width="40" height="50" rx="2" fill="#8e6c4f" stroke="#7d5a3c" stroke-width="1.5"/>
+                        <circle cx="212" cy="202" r="2.5" fill="#d4a053"/>
+                        <!-- Окна -->
+                        <rect x="100" y="155" width="35" height="30" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="1.5"/>
+                        <rect x="265" y="155" width="35" height="30" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="1.5"/>
+                        <!-- Метка 1 этаж -->
+                        <text x="200" y="25" text-anchor="middle" font-size="14" fill="#555" font-family="sans-serif">1 ЭТАЖ</text>
+                    </svg>
+                </div>
+                <div class="product-card__body">
+                    <h3 class="product-card__title">Одноэтажный дом 10×10</h3>
+                    <ul class="product-card__specs">
+                        <li><strong>Площадь:</strong> 100 м²</li>
+                        <li><strong>Высота стен:</strong> 3,0 м</li>
+                        <li><strong>Толщина стен:</strong> 300 мм</li>
+                        <li><strong>Объём блоков:</strong> ~36 м³</li>
+                        <li><strong>Облицовка:</strong> встроенная</li>
+                        <li><strong>Соединение:</strong> паз-гребень</li>
+                    </ul>
+                    <div class="product-card__footer">
+                        <div class="product-card__price">
+                            <span class="price-label">Стоимость комплекта</span>
+                            <span class="price-value">820 000 ₽</span>
+                        </div>
+                        <button class="btn btn--primary btn--full" onclick="openOrder('Одноэтажный дом 10×10', '820 000 ₽')">
+                            Заказать
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Двухэтажный дом -->
+            <div class="product-card" data-product="two-story">
+                <div class="product-card__badge product-card__badge--blue">Максимум площади</div>
+                <div class="product-card__image">
+                    <svg viewBox="0 0 400 280" class="product-svg">
+                        <rect x="0" y="0" width="400" height="280" fill="#f0f4f8" rx="8"/>
+                        <rect x="0" y="240" width="400" height="40" fill="#a8d5a2"/>
+                        <rect x="60" y="225" width="280" height="18" fill="#7f8c8d" rx="2"/>
+                        <!-- Стена этаж 1 -->
+                        <rect x="75" y="145" width="250" height="80" fill="#ecf0f1" stroke="#ccd1d1" stroke-width="1.5"/>
+                        <!-- Стена этаж 2 -->
+                        <rect x="75" y="70" width="250" height="75" fill="#e8ecef" stroke="#ccd1d1" stroke-width="1.5"/>
+                        <!-- Перекрытие -->
+                        <rect x="70" y="142" width="260" height="6" fill="#bdc3c7"/>
+                        <!-- Блоки 1 этаж -->
+                        <line x1="75" y1="170" x2="325" y2="170" stroke="#dde1e1" stroke-width="0.8"/>
+                        <line x1="75" y1="195" x2="325" y2="195" stroke="#dde1e1" stroke-width="0.8"/>
+                        <!-- Блоки 2 этаж -->
+                        <line x1="75" y1="95" x2="325" y2="95" stroke="#dde1e1" stroke-width="0.8"/>
+                        <line x1="75" y1="120" x2="325" y2="120" stroke="#dde1e1" stroke-width="0.8"/>
+                        <!-- Крыша -->
+                        <polygon points="200,20 40,75 360,75" fill="#c0392b" stroke="#a93226" stroke-width="1.5"/>
+                        <!-- Дверь -->
+                        <rect x="180" y="180" width="40" height="45" rx="2" fill="#8e6c4f" stroke="#7d5a3c" stroke-width="1.5"/>
+                        <circle cx="212" cy="205" r="2.5" fill="#d4a053"/>
+                        <!-- Окна 1 этаж -->
+                        <rect x="100" y="165" width="35" height="28" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="1.5"/>
+                        <rect x="265" y="165" width="35" height="28" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="1.5"/>
+                        <!-- Окна 2 этаж -->
+                        <rect x="100" y="90" width="35" height="28" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="1.5"/>
+                        <rect x="180" y="90" width="35" height="28" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="1.5"/>
+                        <rect x="265" y="90" width="35" height="28" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="1.5"/>
+                        <text x="200" y="15" text-anchor="middle" font-size="14" fill="#555" font-family="sans-serif">2 ЭТАЖА</text>
+                    </svg>
+                </div>
+                <div class="product-card__body">
+                    <h3 class="product-card__title">Двухэтажный дом 10×10</h3>
+                    <ul class="product-card__specs">
+                        <li><strong>Площадь:</strong> 200 м²</li>
+                        <li><strong>Высота стен:</strong> 3,0 м × 2 этажа</li>
+                        <li><strong>Толщина стен:</strong> 300 мм</li>
+                        <li><strong>Объём блоков:</strong> ~72 м³</li>
+                        <li><strong>Облицовка:</strong> встроенная</li>
+                        <li><strong>Соединение:</strong> паз-гребень</li>
+                    </ul>
+                    <div class="product-card__footer">
+                        <div class="product-card__price">
+                            <span class="price-label">Стоимость комплекта</span>
+                            <span class="price-value">1 480 000 ₽</span>
+                        </div>
+                        <button class="btn btn--primary btn--full" onclick="openOrder('Двухэтажный дом 10×10', '1 480 000 ₽')">
+                            Заказать
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Дом с мансардой -->
+            <div class="product-card" data-product="mansard">
+                <div class="product-card__badge product-card__badge--green">Оптимальный выбор</div>
+                <div class="product-card__image">
+                    <svg viewBox="0 0 400 280" class="product-svg">
+                        <rect x="0" y="0" width="400" height="280" fill="#f0f4f8" rx="8"/>
+                        <rect x="0" y="240" width="400" height="40" fill="#a8d5a2"/>
+                        <rect x="60" y="225" width="280" height="18" fill="#7f8c8d" rx="2"/>
+                        <!-- Стена 1 этаж -->
+                        <rect x="75" y="145" width="250" height="80" fill="#ecf0f1" stroke="#ccd1d1" stroke-width="1.5"/>
+                        <!-- Мансарда стены -->
+                        <polygon points="75,145 75,105 200,50 325,105 325,145" fill="#e8ecef" stroke="#ccd1d1" stroke-width="1.5"/>
+                        <!-- Крыша мансарды -->
+                        <polygon points="200,50 55,145 345,145" fill="none" stroke="#a93226" stroke-width="2"/>
+                        <polygon points="200,42 45,148 355,148" fill="none"/>
+                        <line x1="55" y1="145" x2="200" y2="50" stroke="#c0392b" stroke-width="4"/>
+                        <line x1="345" y1="145" x2="200" y2="50" stroke="#c0392b" stroke-width="4"/>
+                        <!-- Блоки 1 этаж -->
+                        <line x1="75" y1="170" x2="325" y2="170" stroke="#dde1e1" stroke-width="0.8"/>
+                        <line x1="75" y1="195" x2="325" y2="195" stroke="#dde1e1" stroke-width="0.8"/>
+                        <!-- Мансардное окно -->
+                        <rect x="170" y="85" width="60" height="40" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="1.5"/>
+                        <line x1="200" y1="85" x2="200" y2="125" stroke="#85c1e9" stroke-width="1"/>
+                        <line x1="170" y1="105" x2="230" y2="105" stroke="#85c1e9" stroke-width="1"/>
+                        <!-- Дверь -->
+                        <rect x="180" y="180" width="40" height="45" rx="2" fill="#8e6c4f" stroke="#7d5a3c" stroke-width="1.5"/>
+                        <circle cx="212" cy="205" r="2.5" fill="#d4a053"/>
+                        <!-- Окна 1 этаж -->
+                        <rect x="100" y="165" width="35" height="28" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="1.5"/>
+                        <rect x="265" y="165" width="35" height="28" rx="2" fill="#aed6f1" stroke="#85c1e9" stroke-width="1.5"/>
+                        <text x="200" y="15" text-anchor="middle" font-size="14" fill="#555" font-family="sans-serif">С МАНСАРДОЙ</text>
+                    </svg>
+                </div>
+                <div class="product-card__body">
+                    <h3 class="product-card__title">Дом с мансардой 10×10</h3>
+                    <ul class="product-card__specs">
+                        <li><strong>Площадь:</strong> 150 м²</li>
+                        <li><strong>Высота 1 этаж:</strong> 3,0 м</li>
+                        <li><strong>Мансарда:</strong> до 2,5 м в коньке</li>
+                        <li><strong>Объём блоков:</strong> ~48 м³</li>
+                        <li><strong>Облицовка:</strong> встроенная</li>
+                        <li><strong>Соединение:</strong> паз-гребень</li>
+                    </ul>
+                    <div class="product-card__footer">
+                        <div class="product-card__price">
+                            <span class="price-label">Стоимость комплекта</span>
+                            <span class="price-value">1 120 000 ₽</span>
+                        </div>
+                        <button class="btn btn--primary btn--full" onclick="openOrder('Дом с мансардой 10×10', '1 120 000 ₽')">
+                            Заказать
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="catalog__note">
+            <p>* В стоимость домокомплекта входят стеновые блоки, перемычки оконных и дверных проёмов, угловые элементы, клей для кладки и подробная инструкция по сборке. Фундамент, кровля, перекрытия и инженерные системы рассчитываются отдельно.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Что входит в комплект -->
+<section class="includes" id="includes">
+    <div class="container">
+        <h2 class="section-title">Что входит в домокомплект</h2>
+        <div class="includes__grid">
+            <div class="includes__item">
+                <div class="includes__number">1</div>
+                <h3>Стеновые блоки</h3>
+                <p>Фибропенобетонные блоки 600×300×200 мм со встроенной облицовкой и системой паз-гребень для наружных стен.</p>
+            </div>
+            <div class="includes__item">
+                <div class="includes__number">2</div>
+                <h3>Перегородочные блоки</h3>
+                <p>Блоки для внутренних перегородок толщиной 100 и 150 мм с пазогребневым соединением.</p>
+            </div>
+            <div class="includes__item">
+                <div class="includes__number">3</div>
+                <h3>Перемычки</h3>
+                <p>Армированные перемычки для оконных и дверных проёмов. Точные размеры под каждый проём.</p>
+            </div>
+            <div class="includes__item">
+                <div class="includes__number">4</div>
+                <h3>Угловые элементы</h3>
+                <p>Специальные угловые блоки для формирования углов здания с сохранением рисунка облицовки.</p>
+            </div>
+            <div class="includes__item">
+                <div class="includes__number">5</div>
+                <h3>Клей для кладки</h3>
+                <p>Специализированный тонкошовный клей. Толщина шва 2-3 мм — отсутствие мостиков холода.</p>
+            </div>
+            <div class="includes__item">
+                <div class="includes__number">6</div>
+                <h3>Инструкция по сборке</h3>
+                <p>Подробная пошаговая инструкция с раскладкой блоков, порядовкой и рекомендациями по монтажу.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Технология -->
+<section class="technology" id="technology">
+    <div class="container">
+        <h2 class="section-title">Технология фибропенобетонных блоков</h2>
+        <div class="technology__content">
+            <div class="technology__info">
+                <div class="tech-block">
+                    <h3>Что такое фибропенобетон?</h3>
+                    <p>Фибропенобетон — это лёгкий ячеистый бетон, армированный полипропиленовой фиброй. Фибра равномерно распределена по объёму блока и повышает прочность на изгиб и растяжение, устойчивость к трещинообразованию и ударным нагрузкам.</p>
+                </div>
+                <div class="tech-block">
+                    <h3>Встроенная облицовка</h3>
+                    <p>На этапе производства к несущему слою блока добавляется декоративный фасадный слой. Он составляет единое целое с блоком и не отслаивается. Доступны текстуры: гладкая, «рваный камень», «кирпич».</p>
+                </div>
+                <div class="tech-block">
+                    <h3>Система «паз-гребень»</h3>
+                    <p>Торцевые грани блока имеют профиль паз-гребень. Это обеспечивает точную геометрию стены, исключает продувание вертикальных швов и ускоряет кладку в 2-3 раза по сравнению с классическими блоками.</p>
+                </div>
+            </div>
+            <div class="technology__specs">
+                <h3>Технические характеристики</h3>
+                <table class="specs-table">
+                    <tbody>
+                        <tr><td>Плотность</td><td>D500 — D700</td></tr>
+                        <tr><td>Класс прочности</td><td>B2.0 — B2.5</td></tr>
+                        <tr><td>Теплопроводность</td><td>0,08 — 0,12 Вт/(м·К)</td></tr>
+                        <tr><td>Морозостойкость</td><td>F50 — F75</td></tr>
+                        <tr><td>Огнестойкость</td><td>REI 150 (НГ)</td></tr>
+                        <tr><td>Размер блока</td><td>600×300×200 мм</td></tr>
+                        <tr><td>Облицовочный слой</td><td>20 мм</td></tr>
+                        <tr><td>Паз-гребень</td><td>торцевые грани</td></tr>
+                        <tr><td>Масса блока</td><td>18-22 кг</td></tr>
+                        <tr><td>Усадка</td><td>не более 0,5 мм/м</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Этапы -->
+<section class="steps" id="steps">
+    <div class="container">
+        <h2 class="section-title">Как заказать домокомплект</h2>
+        <div class="steps__grid">
+            <div class="step">
+                <div class="step__number">01</div>
+                <h3 class="step__title">Выберите проект</h3>
+                <p class="step__text">Определитесь с типом дома: одноэтажный, двухэтажный или с мансардой.</p>
+            </div>
+            <div class="step__arrow">&rarr;</div>
+            <div class="step">
+                <div class="step__number">02</div>
+                <h3 class="step__title">Оставьте заявку</h3>
+                <p class="step__text">Заполните форму или позвоните. Мы свяжемся в течение 1 часа.</p>
+            </div>
+            <div class="step__arrow">&rarr;</div>
+            <div class="step">
+                <div class="step__number">03</div>
+                <h3 class="step__title">Заключаем договор</h3>
+                <p class="step__text">Фиксируем состав комплекта, сроки производства и доставки.</p>
+            </div>
+            <div class="step__arrow">&rarr;</div>
+            <div class="step">
+                <div class="step__number">04</div>
+                <h3 class="step__title">Доставка и сборка</h3>
+                <p class="step__text">Доставляем на объект. Можно собрать самостоятельно или нашей бригадой.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- О компании -->
+<section class="about" id="about">
+    <div class="container">
+        <h2 class="section-title">О компании</h2>
+        <div class="about__content">
+            <div class="about__text">
+                <p>Мы — производители фибропенобетонных блоков со встроенной облицовкой и системой «паз-гребень» для малоэтажного строительства.</p>
+                <p>Наша задача — сделать строительство собственного дома доступным, быстрым и качественным. Мы производим стеновой материал, который объединяет в себе несущую функцию, теплоизоляцию и фасадную отделку.</p>
+                <p>Типовые домокомплекты позволяют существенно сократить сроки и стоимость строительства: вы получаете полный набор блоков с подробной инструкцией и собираете стены дома как конструктор.</p>
+            </div>
+            <div class="about__counters">
+                <div class="counter">
+                    <span class="counter__value">500+</span>
+                    <span class="counter__label">домов построено</span>
+                </div>
+                <div class="counter">
+                    <span class="counter__value">7 лет</span>
+                    <span class="counter__label">на рынке</span>
+                </div>
+                <div class="counter">
+                    <span class="counter__value">50+ лет</span>
+                    <span class="counter__label">срок службы блоков</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Контакты -->
+<section class="contacts" id="contacts">
+    <div class="container">
+        <h2 class="section-title">Контакты</h2>
+        <div class="contacts__grid">
+            <div class="contacts__info">
+                <div class="contact-item">
+                    <h3>Телефон</h3>
+                    <a href="tel:+70001234567">+7 (000) 123-45-67</a>
+                </div>
+                <div class="contact-item">
+                    <h3>Email</h3>
+                    <a href="mailto:info@fibrodom.ru">info@fibrodom.ru</a>
+                </div>
+                <div class="contact-item">
+                    <h3>Адрес производства</h3>
+                    <p>Россия, ваш город, ул. Промышленная, д. 1</p>
+                </div>
+                <div class="contact-item">
+                    <h3>Режим работы</h3>
+                    <p>Пн-Пт: 8:00 — 18:00<br>Сб: 9:00 — 15:00</p>
+                </div>
+            </div>
+            <form class="contacts__form" id="contactForm" onsubmit="return handleContactForm(event)">
+                <h3>Задайте вопрос</h3>
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="Ваше имя" required>
+                </div>
+                <div class="form-group">
+                    <input type="tel" name="phone" placeholder="Телефон" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <textarea name="message" placeholder="Ваш вопрос" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn--primary btn--full">Отправить</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Подвал -->
+<footer class="footer">
+    <div class="container footer__inner">
+        <div class="footer__brand">
+            <span class="logo">
+                <span class="logo__icon">&#9670;</span>
+                <span class="logo__text">ФиброДом</span>
+            </span>
+            <p>Домокомплекты из фибропенобетонных блоков со встроенной облицовкой и паз-гребнем для малоэтажного строительства.</p>
+        </div>
+        <div class="footer__links">
+            <h4>Навигация</h4>
+            <a href="#advantages">Преимущества</a>
+            <a href="#catalog">Домокомплекты</a>
+            <a href="#technology">Технология</a>
+            <a href="#about">О нас</a>
+            <a href="#contacts">Контакты</a>
+        </div>
+        <div class="footer__contacts">
+            <h4>Контакты</h4>
+            <a href="tel:+70001234567">+7 (000) 123-45-67</a>
+            <a href="mailto:info@fibrodom.ru">info@fibrodom.ru</a>
+        </div>
+    </div>
+    <div class="footer__bottom">
+        <div class="container">
+            <p>&copy; 2026 ФиброДом. Все права защищены.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Модальное окно заказа -->
+<div class="modal" id="orderModal">
+    <div class="modal__overlay" onclick="closeOrder()"></div>
+    <div class="modal__content">
+        <button class="modal__close" onclick="closeOrder()">&times;</button>
+        <h2 class="modal__title">Заказать домокомплект</h2>
+        <p class="modal__product" id="modalProduct"></p>
+        <p class="modal__price" id="modalPrice"></p>
+        <form id="orderForm" onsubmit="return handleOrderForm(event)">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Ваше имя *" required>
+            </div>
+            <div class="form-group">
+                <input type="tel" name="phone" placeholder="Телефон *" required>
+            </div>
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Email">
+            </div>
+            <div class="form-group">
+                <input type="text" name="city" placeholder="Город доставки">
+            </div>
+            <div class="form-group">
+                <textarea name="comment" placeholder="Комментарий к заказу" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn--primary btn--full">Оформить заявку</button>
+            <p class="modal__note">Нажимая кнопку, вы соглашаетесь на обработку персональных данных.</p>
+        </form>
+    </div>
+</div>
+
+<!-- Уведомление -->
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
