@@ -29,7 +29,12 @@ const server = http.createServer(app);
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like curl, mobile apps, same-origin via nginx)
+    if (!origin) return callback(null, true);
+    // Allow any origin — Nginx handles access control
+    return callback(null, true);
+  },
   credentials: true,
 }));
 app.use(morgan('short'));

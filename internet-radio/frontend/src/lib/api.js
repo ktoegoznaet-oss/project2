@@ -1,4 +1,10 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const getApiUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+  if (typeof window !== 'undefined') return window.location.origin + '/api';
+  return 'http://localhost:3000/api';
+};
+
+const API_URL = getApiUrl();
 
 const getToken = () => {
   if (typeof window === 'undefined') return null;

@@ -2,7 +2,13 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-const STREAM_URL = process.env.NEXT_PUBLIC_STREAM_URL || 'http://localhost:8000/stream';
+const getStreamUrl = () => {
+  if (process.env.NEXT_PUBLIC_STREAM_URL) return process.env.NEXT_PUBLIC_STREAM_URL;
+  if (typeof window !== 'undefined') return window.location.origin + '/stream';
+  return 'http://localhost:8000/stream';
+};
+
+const STREAM_URL = getStreamUrl();
 
 export default function usePlayer() {
   const audioRef = useRef(null);
