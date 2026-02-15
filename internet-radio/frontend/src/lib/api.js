@@ -1,10 +1,5 @@
-const getApiUrl = () => {
-  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
-  if (typeof window !== 'undefined') return window.location.origin + '/api';
-  return 'http://localhost:3000/api';
-};
-
-const API_URL = getApiUrl();
+// Relative path — works on any domain. Nginx proxies /api → backend:3000
+const API_URL = '/api';
 
 const getToken = () => {
   if (typeof window === 'undefined') return null;

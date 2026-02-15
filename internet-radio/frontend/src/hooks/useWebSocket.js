@@ -2,16 +2,12 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 
+// Build WS URL from current page host at runtime — no env dependency
 const getWsUrl = () => {
-  if (process.env.NEXT_PUBLIC_WS_URL) return process.env.NEXT_PUBLIC_WS_URL;
-  if (typeof window !== 'undefined') {
-    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${proto}//${window.location.host}/ws`;
-  }
-  return 'ws://localhost:3000/ws';
+  if (typeof window === 'undefined') return 'ws://localhost:3000/ws';
+  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${proto}//${window.location.host}/ws`;
 };
-
-const WS_URL = getWsUrl();
 
 export default function useWebSocket() {
   const wsRef = useRef(null);
@@ -25,7 +21,7 @@ export default function useWebSocket() {
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    const ws = new WebSocket(WS_URL);
+    const ws = new WebSocket(getWsUrl());
     wsRef.current = ws;
 
     ws.onopen = () => {

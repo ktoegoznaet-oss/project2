@@ -2,13 +2,11 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 
+// Relative path — Nginx proxies /stream → icecast:8000
 const getStreamUrl = () => {
-  if (process.env.NEXT_PUBLIC_STREAM_URL) return process.env.NEXT_PUBLIC_STREAM_URL;
-  if (typeof window !== 'undefined') return window.location.origin + '/stream';
-  return 'http://localhost:8000/stream';
+  if (typeof window === 'undefined') return 'http://localhost:8000/stream';
+  return window.location.origin + '/stream';
 };
-
-const STREAM_URL = getStreamUrl();
 
 export default function usePlayer() {
   const audioRef = useRef(null);
@@ -45,7 +43,7 @@ export default function usePlayer() {
   const play = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.src = STREAM_URL;
+    audio.src = getStreamUrl();
     audio.play().catch(() => {});
   }, []);
 
