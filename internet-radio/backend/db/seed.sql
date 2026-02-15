@@ -4,13 +4,13 @@
 
 -- Admin user (password: admin123)
 INSERT INTO users (username, email, password_hash, role, balance) VALUES
-('admin', 'admin@radio.local', '$2a$12$LJ3m4ys3OzfNSGONIWx0/.xyEhFGA/vHWMoGDBuXj0KJVrFMbxVYK', 'admin', 10000.00);
+('admin', 'admin@radio.local', '$2a$12$GYxAJmzPg2ck8u4MOfvXFuPSZAUIPNAmFpEqv1c1WxLn13DIbhPm2', 'admin', 10000.00);
 
 -- Test users (password: test123)
 INSERT INTO users (username, email, password_hash, role, balance, subscription_type, subscription_expires, free_orders_remaining) VALUES
-('dj_lover', 'dj@test.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', 500.00, 'premium', NOW() + INTERVAL '30 days', 8),
-('music_fan', 'fan@test.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', 200.00, 'basic', NOW() + INTERVAL '15 days', 1),
-('rocker', 'rock@test.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', 1500.00, 'vip', NOW() + INTERVAL '60 days', 25);
+('dj_lover', 'dj@test.com', '$2a$12$Mq6qpLkpym9YHMWXHdXD.OjfZMybw0TNQ1xKSaDVtdU6kj82ie.jm', 'user', 500.00, 'premium', NOW() + INTERVAL '30 days', 8),
+('music_fan', 'fan@test.com', '$2a$12$Mq6qpLkpym9YHMWXHdXD.OjfZMybw0TNQ1xKSaDVtdU6kj82ie.jm', 'user', 200.00, 'basic', NOW() + INTERVAL '15 days', 1),
+('rocker', 'rock@test.com', '$2a$12$Mq6qpLkpym9YHMWXHdXD.OjfZMybw0TNQ1xKSaDVtdU6kj82ie.jm', 'user', 1500.00, 'vip', NOW() + INTERVAL '60 days', 25);
 
 -- Test songs
 INSERT INTO songs (title, artist, genre, duration, file_path, order_price, play_count) VALUES
