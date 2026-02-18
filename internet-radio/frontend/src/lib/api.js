@@ -104,6 +104,7 @@ export const api = {
       return request(`/admin/song-orders?${qs}`);
     },
     users: () => request('/admin/users'),
+    updateUser: (id, body) => request(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
     stats: (params = {}) => {
       const qs = new URLSearchParams(params).toString();
       return request(`/admin/stats?${qs}`);

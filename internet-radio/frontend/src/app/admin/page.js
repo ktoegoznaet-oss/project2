@@ -46,7 +46,12 @@ function AdminDashboard() {
         <StatCard icon={<HiClipboardList />} label="Кастомные" value={dashboard?.pending_custom_orders || 0} color="red" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Link href="/admin/users" className="card hover:border-brand-500/50 transition group">
+          <HiUsers className="text-3xl text-blue-400 mb-3 group-hover:scale-110 transition" />
+          <h3 className="text-lg font-bold text-white mb-1">Пользователи</h3>
+          <p className="text-sm text-dark-300">Управление пользователями и ролями</p>
+        </Link>
         <Link href="/admin/upload" className="card hover:border-brand-500/50 transition group">
           <HiUpload className="text-3xl text-brand-400 mb-3 group-hover:scale-110 transition" />
           <h3 className="text-lg font-bold text-white mb-1">Загрузить песни</h3>

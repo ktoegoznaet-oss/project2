@@ -158,6 +158,53 @@ router.get('/users', auth, adminOnly, async (req, res, next) => {
   }
 });
 
+router.put('/users/:id', auth, adminOnly, async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const { role, balance_add } = req.body;
+    const updates = [];
+    const params = [];
+    let paramIdx = 1;
+
+    if (role) {
+      const validRoles = ['user', 'moderator', 'admin'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ error: 'Неверная роль' });
+      }
+      updates.push(`role = $${paramIdx++}`);
+      params.push(role);
+    }
+
+    if (balance_add !== undefined && balance_add !== null) {
+      const amount = parseFloat(balance_add);
+      if (isNaN(amount)) {
+        return res.status(400).json({ error: 'Неверная сумма' });
+      }
+      updates.push(`balance = balance + $${paramIdx++}`);
+      params.push(amount);
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'Нечего обновлять' });
+    }
+
+    params.push(userId);
+    const result = await query(
+      `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramIdx} RETURNING id, username, email, role, balance, subscription_type, subscription_expires, created_at, last_active`,
+      params
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+
+    logger.info('User updated by admin', { userId, role, balance_add });
+    res.json({ user: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/stats', auth, adminOnly, async (req, res, next) => {
   try {
     const { question, type } = req.query;
