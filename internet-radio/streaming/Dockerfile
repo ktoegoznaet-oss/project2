@@ -5,6 +5,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     icecast2 \
     liquidsoap \
+    liquidsoap-plugin-icecast \
+    liquidsoap-plugin-mad \
+    liquidsoap-plugin-vorbis \
+    liquidsoap-plugin-lame \
+    netcat-openbsd \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -12,19 +17,14 @@ RUN apt-get update && apt-get install -y \
 COPY icecast.xml /etc/icecast2/icecast.xml
 COPY radio.liq /etc/liquidsoap/radio.liq
 
+# Copy startup script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
 # Create directories
-RUN mkdir -p /music /jingles /var/log/icecast \
+RUN mkdir -p /music /jingles /var/log/icecast /var/log/liquidsoap \
     && chown -R icecast2:icecast /var/log/icecast \
     && chmod 755 /etc/liquidsoap/radio.liq
-
-# Create startup script
-RUN echo '#!/bin/bash\n\
-echo "Starting Icecast2..."\n\
-icecast2 -b -c /etc/icecast2/icecast.xml\n\
-sleep 2\n\
-echo "Starting Liquidsoap..."\n\
-liquidsoap /etc/liquidsoap/radio.liq\n\
-' > /start.sh && chmod +x /start.sh
 
 EXPOSE 8000 8001 1234
 

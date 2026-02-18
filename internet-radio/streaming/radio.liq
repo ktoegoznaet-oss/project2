@@ -2,26 +2,31 @@
 
 # =============================================
 # RadioWave — Liquidsoap Script
+# Compatible with Liquidsoap 1.4.x (Ubuntu 22.04)
 # =============================================
 
-settings.server.telnet.set(true)
-settings.server.telnet.port.set(1234)
-settings.server.telnet.bind_addr.set("0.0.0.0")
+# Telnet server for remote control
+set("server.telnet", true)
+set("server.telnet.port", 1234)
+set("server.telnet.bind_addr", "0.0.0.0")
+
+# Logging
+set("log.file.path", "/var/log/liquidsoap/radio.log")
+set("log.level", 3)
 
 # =============================================
 # Music Sources
 # =============================================
 
-# Main rotation — all music files
-music = playlist(
-  mode="randomize",
-  reload=3600,
-  reload_mode="rounds",
-  "/music"
-)
+# Main rotation — all music files from /music directory
+# reload every hour, randomize order
+music = playlist(mode="randomize", reload=3600, reload_mode="rounds", "/music")
 
-# Fallback — silence if no music
-silence = blank(id="silence")
+# Safety fallback — silence if nothing plays
+safety = blank(id="silence")
+
+# Make music safe (won't crash if /music is empty)
+music = mksafe(music)
 
 # =============================================
 # Request Queues
@@ -37,40 +42,27 @@ request_queue = request.queue(id="request_queue")
 jingle_queue = request.queue(id="jingle_queue")
 
 # =============================================
-# Jingle Insertion Logic
+# Track Change Callback
 # =============================================
 
-# Counter for jingle insertion every 3 songs
-song_count = ref(0)
-
-def on_track_change(m) =
-  song_count := !song_count + 1
-
-  # Notify backend about track change
+def on_track_change(m)
   title = m["title"]
   artist = m["artist"]
   filename = m["filename"]
 
-  ignore(
-    thread.run(
-      fun() -> begin
-        ignore(
-          process.run(
-            "curl -s -X POST http://backend:3000/api/stream/now-playing " ^
-            "-H 'Content-Type: application/json' " ^
-            "-d '{\"title\": \"#{title}\", \"artist\": \"#{artist}\", \"file_path\": \"#{filename}\"}'"
-          )
-        )
-      end
-    )
-  )
+  # Notify backend about track change
+  ignore(server.execute(
+    "curl -s -X POST http://backend:3000/api/stream/now-playing "^
+    "-H 'Content-Type: application/json' "^
+    "-d '{\"title\": \"#{title}\", \"artist\": \"#{artist}\", \"file_path\": \"#{filename}\"}' &"
+  ))
 end
 
 # =============================================
 # Build the Main Stream
 # =============================================
 
-# Priority: jingle → priority_queue → request_queue → music rotation → silence
+# Priority: jingle → priority_queue → request_queue → music rotation
 main = fallback(
   id="main",
   track_sensitive=true,
@@ -79,7 +71,7 @@ main = fallback(
     priority_queue,
     request_queue,
     music,
-    silence
+    safety
   ]
 )
 
@@ -108,5 +100,6 @@ output.icecast(
   genre="Various",
   url="http://localhost",
   public=true,
+  fallible=true,
   main
 )
