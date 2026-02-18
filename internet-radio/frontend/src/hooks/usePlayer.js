@@ -13,6 +13,8 @@ export default function usePlayer() {
   const [playing, setPlaying] = useState(false);
   const [volume, setVolumeState] = useState(0.7);
   const [muted, setMuted] = useState(false);
+  const [error, setError] = useState(null);
+  const retryTimerRef = useRef(null);
 
   useEffect(() => {
     const audio = new Audio();
@@ -29,14 +31,18 @@ export default function usePlayer() {
       audio.volume = 0.7;
     }
 
-    audio.addEventListener('playing', () => setPlaying(true));
+    audio.addEventListener('playing', () => { setPlaying(true); setError(null); });
     audio.addEventListener('pause', () => setPlaying(false));
     audio.addEventListener('ended', () => setPlaying(false));
-    audio.addEventListener('error', () => setPlaying(false));
+    audio.addEventListener('error', () => {
+      setPlaying(false);
+      setError('Поток недоступен. Проверьте, запущен ли Icecast.');
+    });
 
     return () => {
       audio.pause();
       audio.src = '';
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     };
   }, []);
 
@@ -84,5 +90,5 @@ export default function usePlayer() {
     }
   }, [muted, volume]);
 
-  return { playing, volume, muted, play, pause, togglePlay, setVolume, toggleMute };
+  return { playing, volume, muted, error, play, pause, togglePlay, setVolume, toggleMute };
 }

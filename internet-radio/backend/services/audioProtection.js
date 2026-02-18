@@ -87,6 +87,12 @@ const serveHLSFile = (req, res) => {
   res.setHeader('Expires', '0');
 
   const stream = fs.createReadStream(filePath);
+  stream.on('error', (err) => {
+    logger.error('HLS stream read error', { filePath, error: err.message });
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Stream error' });
+    }
+  });
   stream.pipe(res);
 };
 

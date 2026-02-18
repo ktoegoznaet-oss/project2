@@ -6,7 +6,7 @@ import usePlayer from '../hooks/usePlayer';
 import { api } from '../lib/api';
 
 export default function Player() {
-  const { playing, volume, muted, togglePlay, setVolume, toggleMute } = usePlayer();
+  const { playing, volume, muted, error, togglePlay, setVolume, toggleMute } = usePlayer();
   const [nowPlaying, setNowPlaying] = useState({ title: 'RadioWave', artist: 'Загрузка...' });
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function Player() {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white truncate">{nowPlaying.title}</p>
-            <p className="text-xs text-dark-200 truncate">{nowPlaying.artist}</p>
+            <p className="text-xs text-dark-200 truncate">{error || nowPlaying.artist}</p>
           </div>
           {nowPlaying.genre && (
             <span className="hidden sm:inline text-xs bg-dark-500 text-dark-100 px-2 py-0.5 rounded-full">{nowPlaying.genre}</span>

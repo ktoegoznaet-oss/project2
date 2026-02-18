@@ -15,6 +15,7 @@ router.post('/song', auth, orderLimiter, async (req, res, next) => {
 
     const { song_id, message = '' } = req.body;
     if (!song_id) {
+      await client.query('ROLLBACK');
       return res.status(400).json({ error: 'Укажите song_id' });
     }
 
@@ -26,6 +27,10 @@ router.post('/song', auth, orderLimiter, async (req, res, next) => {
     const song = songResult.rows[0];
 
     const userResult = await client.query('SELECT id, username, balance, subscription_type, free_orders_remaining FROM users WHERE id = $1 FOR UPDATE', [req.user.id]);
+    if (userResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
     const user = userResult.rows[0];
 
     let pricePaid = 0;
@@ -87,13 +92,14 @@ router.post('/custom-song', auth, orderLimiter, async (req, res, next) => {
     const { lyrics, style_description = '', reference_song_id, air_count = 1 } = req.body;
 
     if (!lyrics || lyrics.trim().length < 10) {
+      await client.query('ROLLBACK');
       return res.status(400).json({ error: 'Текст песни должен быть не менее 10 символов' });
     }
 
     const airCountNum = Math.max(1, Math.min(100, parseInt(air_count)));
 
     if (reference_song_id) {
-      const refSong = await client.query('SELECT id FROM songs WHERE id = $1', [reference_song_id]);
+      const refSong = await client.query('SELECT id FROM songs WHERE id = $1 FOR UPDATE', [reference_song_id]);
       if (refSong.rows.length === 0) {
         await client.query('ROLLBACK');
         return res.status(400).json({ error: 'Референсная песня не найдена' });
@@ -101,6 +107,10 @@ router.post('/custom-song', auth, orderLimiter, async (req, res, next) => {
     }
 
     const userResult = await client.query('SELECT id, balance, subscription_type FROM users WHERE id = $1 FOR UPDATE', [req.user.id]);
+    if (userResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
     const user = userResult.rows[0];
 
     const price = calculateCustomSongPrice(airCountNum, user.subscription_type);

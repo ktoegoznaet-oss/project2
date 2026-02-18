@@ -82,11 +82,21 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         await client.query('UPDATE users SET balance = balance + $1 WHERE id = $2', [payment.amount, payment.user_id]);
       } else if (payment.payment_type === 'subscription') {
         const meta = payment.metadata;
+        if (!meta || !meta.subscription_slug) {
+          logger.error('Invalid subscription metadata', { paymentId: payment.id, metadata: meta });
+          await client.query('ROLLBACK');
+          return res.status(200).json({ ok: true });
+        }
         const slug = meta.subscription_slug;
         const period = meta.period || 'monthly';
         const interval = period === 'yearly' ? "365 days" : "30 days";
 
         const subResult = await client.query('SELECT features FROM subscriptions WHERE slug = $1', [slug]);
+        if (subResult.rows.length === 0) {
+          logger.error('Subscription not found', { slug, paymentId: payment.id });
+          await client.query('ROLLBACK');
+          return res.status(200).json({ ok: true });
+        }
         const freeOrders = subResult.rows[0]?.features?.free_orders_monthly || 0;
 
         await client.query(

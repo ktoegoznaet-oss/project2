@@ -56,6 +56,7 @@
         <webroot>/usr/share/icecast2/web</webroot>
         <adminroot>/usr/share/icecast2/admin</adminroot>
         <alias source="/" destination="/status.xsl"/>
+        <mime-types>/usr/share/icecast2/mime.types</mime-types>
     </paths>
 
     <logging>
@@ -67,5 +68,9 @@
 
     <security>
         <chroot>0</chroot>
+        <changeowner>
+            <user>icecast2</user>
+            <group>icecast</group>
+        </changeowner>
     </security>
 </icecast>

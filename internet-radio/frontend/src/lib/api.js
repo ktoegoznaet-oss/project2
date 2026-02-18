@@ -105,6 +105,9 @@ export const api = {
     },
     users: () => request('/admin/users'),
     updateUser: (id, body) => request(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+    deleteUser: (id) => request(`/admin/users/${id}`, { method: 'DELETE' }),
+    songs: () => request('/admin/songs'),
+    deleteSong: (id) => request(`/admin/songs/${id}`, { method: 'DELETE' }),
     stats: (params = {}) => {
       const qs = new URLSearchParams(params).toString();
       return request(`/admin/stats?${qs}`);

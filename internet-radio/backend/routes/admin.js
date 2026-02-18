@@ -205,6 +205,67 @@ router.put('/users/:id', auth, adminOnly, async (req, res, next) => {
   }
 });
 
+router.delete('/users/:id', auth, adminOnly, async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+
+    if (userId === req.user.id) {
+      return res.status(400).json({ error: 'Нельзя удалить самого себя' });
+    }
+
+    // Delete related data first (foreign key constraints)
+    await query('DELETE FROM song_orders WHERE user_id = $1', [userId]);
+    await query('DELETE FROM custom_song_orders WHERE user_id = $1', [userId]);
+    await query('DELETE FROM payments WHERE user_id = $1', [userId]);
+    await query('DELETE FROM listening_stats WHERE user_id = $1', [userId]);
+    await query('DELETE FROM chat_messages WHERE user_id = $1', [userId]);
+
+    const result = await query('DELETE FROM users WHERE id = $1 RETURNING id, username', [userId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+
+    logger.info('User deleted by admin', { userId, username: result.rows[0].username });
+    res.json({ message: 'Пользователь удалён', user: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/songs/:id', auth, adminOnly, async (req, res, next) => {
+  try {
+    const songId = req.params.id;
+
+    // Delete related orders first
+    await query('DELETE FROM song_orders WHERE song_id = $1', [songId]);
+    await query('DELETE FROM listening_stats WHERE song_id = $1', [songId]);
+
+    const result = await query('DELETE FROM songs WHERE id = $1 RETURNING id, title, artist', [songId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Песня не найдена' });
+    }
+
+    logger.info('Song deleted by admin', { songId, title: result.rows[0].title });
+    res.json({ message: 'Песня удалена', song: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/songs', auth, adminOnly, async (req, res, next) => {
+  try {
+    const result = await query(
+      `SELECT id, title, artist, genre, order_price, is_active, play_count, file_path, created_at
+       FROM songs ORDER BY created_at DESC LIMIT 500`
+    );
+    res.json({ songs: result.rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/stats', auth, adminOnly, async (req, res, next) => {
   try {
     const { question, type } = req.query;

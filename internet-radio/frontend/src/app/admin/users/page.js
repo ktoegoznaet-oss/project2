@@ -5,7 +5,7 @@ import { api } from '../../../lib/api';
 import AuthGuard from '../../../components/AuthGuard';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { HiArrowLeft, HiSearch, HiShieldCheck, HiUser, HiMail, HiCurrencyDollar, HiCalendar, HiRefresh } from 'react-icons/hi';
+import { HiArrowLeft, HiSearch, HiShieldCheck, HiUser, HiMail, HiCurrencyDollar, HiCalendar, HiRefresh, HiTrash } from 'react-icons/hi';
 
 export default function AdminUsersPage() {
   return (
@@ -65,6 +65,18 @@ function UsersManager() {
       }
     } catch (err) {
       toast.error(err.message || 'Ошибка обновления баланса');
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!confirm('Вы уверены? Будут удалены все заказы, платежи и сообщения пользователя.')) return;
+    try {
+      await api.admin.deleteUser(userId);
+      toast.success('Пользователь удалён');
+      setUsers(prev => prev.filter(u => u.id !== userId));
+      setSelectedUser(null);
+    } catch (err) {
+      toast.error(err.message || 'Ошибка удаления');
     }
   };
 
@@ -209,6 +221,7 @@ function UsersManager() {
           onClose={() => setSelectedUser(null)}
           onRoleChange={handleRoleChange}
           onBalanceChange={handleBalanceChange}
+          onDelete={handleDeleteUser}
           updatingRole={updatingRole}
         />
       )}
@@ -216,7 +229,7 @@ function UsersManager() {
   );
 }
 
-function UserModal({ user, onClose, onRoleChange, onBalanceChange, updatingRole }) {
+function UserModal({ user, onClose, onRoleChange, onBalanceChange, onDelete, updatingRole }) {
   const [balanceAmount, setBalanceAmount] = useState('');
 
   return (
@@ -298,6 +311,16 @@ function UserModal({ user, onClose, onRoleChange, onBalanceChange, updatingRole 
             </button>
           </div>
           <p className="text-xs text-dark-400 mt-1">Положительное число — начисление, отрицательное — списание</p>
+        </div>
+
+        {/* Delete button */}
+        <div className="mb-4">
+          <button
+            onClick={() => onDelete(user.id)}
+            className="w-full py-2 rounded-lg text-sm font-medium text-red-400 border border-red-600/30 bg-red-600/10 hover:bg-red-600/20 transition flex items-center justify-center gap-2"
+          >
+            <HiTrash /> Удалить пользователя
+          </button>
         </div>
 
         {/* Info rows */}
