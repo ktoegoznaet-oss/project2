@@ -9,11 +9,12 @@ const path = require('path');
 
 const { connectRedis } = require('./config/redis');
 const { pool } = require('./config/database');
-const { initWebSocket } = require('./websocket/chatServer');
+const { initWebSocket, broadcast } = require('./websocket/chatServer');
 const { generalLimiter } = require('./middleware/rateLimiter');
 const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
-const { startHourlySummaries } = require('./services/djBot');
+const djBot = require('./services/djBot');
+const { startHourlySummaries } = djBot;
 
 const authRoutes = require('./routes/auth');
 const songsRoutes = require('./routes/songs');
@@ -74,6 +75,10 @@ const start = async () => {
 
     initWebSocket(server);
     logger.info('WebSocket server started');
+
+    // Connect DJ bot broadcast to WebSocket (avoids circular dependency)
+    djBot.setBroadcast(broadcast);
+    logger.info('DJ bot connected to WebSocket broadcast');
 
     startHourlySummaries();
     logger.info('DJ hourly summaries started');

@@ -8,7 +8,6 @@ RUN apt-get update && apt-get install -y \
     netcat-openbsd \
     curl \
     ffmpeg \
-    mime-support \
     && rm -rf /var/lib/apt/lists/*
 
 # Ensure icecast2 user/group exist (needed for <changeowner>)
@@ -24,15 +23,33 @@ COPY radio.liq /etc/liquidsoap/radio.liq
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-# Create mime.types for icecast if missing
-RUN if [ ! -f /usr/share/icecast2/mime.types ]; then \
-      cp /etc/mime.types /usr/share/icecast2/mime.types 2>/dev/null || \
-      echo "audio/mpeg mp3\naudio/ogg ogg\napplication/ogg ogg" > /usr/share/icecast2/mime.types; \
-    fi
+# Create mime.types for icecast (the package may not exist on Ubuntu 26.04)
+RUN mkdir -p /usr/share/icecast2 && printf '%s\n' \
+    "audio/mpeg mp3" \
+    "audio/ogg ogg oga" \
+    "audio/wav wav" \
+    "audio/flac flac" \
+    "audio/aac aac" \
+    "audio/mp4 m4a" \
+    "application/ogg ogg" \
+    "application/xspf+xml xspf" \
+    "video/mp2t ts" \
+    "application/vnd.apple.mpegurl m3u8" \
+    "text/html html htm" \
+    "text/css css" \
+    "text/xml xml xsl" \
+    "application/javascript js" \
+    "application/json json" \
+    "image/png png" \
+    "image/jpeg jpg jpeg" \
+    "image/gif gif" \
+    "image/svg+xml svg" \
+    > /usr/share/icecast2/mime.types
 
 # Create directories and fix permissions
 RUN mkdir -p /music /jingles /var/log/icecast /var/log/liquidsoap \
     && chown -R icecast2:icecast /var/log/icecast 2>/dev/null || true \
+    && chown -R icecast2:icecast /usr/share/icecast2 2>/dev/null || true \
     && chmod 755 /etc/liquidsoap/radio.liq
 
 EXPOSE 8000 8001 1234

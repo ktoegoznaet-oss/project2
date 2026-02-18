@@ -5,6 +5,7 @@ const { sanitizeInput } = require('../utils/helpers');
 const logger = require('../utils/logger');
 
 let wss = null;
+let djBot = null;
 
 const initWebSocket = (server) => {
   wss = new WebSocket.Server({ server, path: '/ws' });
@@ -63,6 +64,9 @@ const initWebSocket = (server) => {
     clearInterval(pingInterval);
   });
 
+  // Lazy-load djBot to avoid circular dependency (djBot → liquidsoap, server → chatServer → djBot)
+  djBot = require('../services/djBot');
+
   logger.info('WebSocket server initialized');
   return wss;
 };
@@ -119,6 +123,17 @@ const handleChatMessage = async (ws, data) => {
   };
 
   broadcast(chatMessage);
+
+  // Trigger DJ bot response (non-blocking, with rate limiting)
+  if (djBot && message.length > 2) {
+    // Respond to ~30% of messages to avoid spam, or always respond to questions
+    const isQuestion = message.includes('?') || message.startsWith('@dj') || message.toLowerCase().includes('бот') || message.toLowerCase().includes('диджей');
+    if (isQuestion || Math.random() < 0.3) {
+      djBot.generateChatResponse(ws.user.username, message).catch(err => {
+        logger.warn('DJ bot chat response error', { error: err.message });
+      });
+    }
+  }
 };
 
 const broadcast = (data) => {

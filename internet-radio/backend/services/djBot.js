@@ -11,6 +11,27 @@ const { promisify } = require('util');
 const execAsync = promisify(exec);
 const JINGLES_DIR = process.env.JINGLES_DIR || '/app/jingles';
 
+// Will be set by server.js after chatServer init (avoids circular dependency)
+let broadcastFn = null;
+
+const setBroadcast = (fn) => {
+  broadcastFn = fn;
+};
+
+const broadcastDJ = (text) => {
+  if (!broadcastFn) return;
+  broadcastFn({
+    type: 'dj_message',
+    id: crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex'),
+    message: `🎙 DJ Bot: ${text}`,
+    username: 'DJ Bot',
+    role: 'bot',
+    is_bot: true,
+    message_type: 'dj',
+    created_at: new Date().toISOString(),
+  });
+};
+
 const generateAnnouncement = async (username, songTitle, artist, userMessage) => {
   try {
     const prompt = `Ты — энергичный радиоведущий. Слушатель ${username} заказал песню ${artist} - ${songTitle}. Сообщение: ${userMessage || 'без сообщения'}. Сгенерируй короткое (2-3 предложения) объявление для радио. Будь дружелюбным и позитивным. Не используй эмодзи.`;
@@ -37,10 +58,48 @@ const generateAnnouncement = async (username, songTitle, artist, userMessage) =>
       [`🎙 DJ Bot: ${text}`]
     );
 
+    broadcastDJ(text);
+
     return { text, audioPath };
   } catch (err) {
     logger.error('DJ announcement generation failed', { error: err.message });
     return { text: null, audioPath: null };
+  }
+};
+
+const generateChatResponse = async (username, userMessage) => {
+  try {
+    const recentMessages = await query(
+      `SELECT message, is_bot, message_type FROM chat_messages
+       ORDER BY created_at DESC LIMIT 10`
+    );
+
+    const context = recentMessages.rows.reverse().map(m =>
+      m.is_bot ? { role: 'assistant', content: m.message } : { role: 'user', content: m.message }
+    );
+
+    const text = await chatCompletion([
+      {
+        role: 'system',
+        content: 'Ты — дружелюбный DJ-бот интернет-радио RadioWave. Отвечай по-русски, коротко (1-3 предложения). Ты ведёшь эфир, общаешься со слушателями, рассказываешь о музыке, шутишь. Не используй эмодзи. Если тебя спрашивают о чём-то, что ты не знаешь — отвечай с юмором.',
+      },
+      ...context,
+      { role: 'user', content: `Слушатель ${username} пишет: ${userMessage}` },
+    ], { max_tokens: 200, temperature: 0.9 });
+
+    logger.info('DJ chat response generated', { text, username });
+
+    await query(
+      "INSERT INTO chat_messages (message, is_bot, message_type) VALUES ($1, TRUE, 'dj')",
+      [`🎙 DJ Bot: ${text}`]
+    );
+
+    broadcastDJ(text);
+
+    return text;
+  } catch (err) {
+    logger.error('DJ chat response failed', { error: err.message });
+    return null;
   }
 };
 
@@ -81,6 +140,8 @@ const generateHourlySummary = async () => {
       "INSERT INTO chat_messages (message, is_bot, message_type) VALUES ($1, TRUE, 'dj')",
       [`🎙 DJ Bot: ${text}`]
     );
+
+    broadcastDJ(text);
 
     logger.info('Hourly summary generated', { text });
     return { text, audioPath };
@@ -178,4 +239,12 @@ const stopHourlySummaries = () => {
   }
 };
 
-module.exports = { generateAnnouncement, generateHourlySummary, textToSpeech, startHourlySummaries, stopHourlySummaries };
+module.exports = {
+  generateAnnouncement,
+  generateChatResponse,
+  generateHourlySummary,
+  textToSpeech,
+  startHourlySummaries,
+  stopHourlySummaries,
+  setBroadcast,
+};
