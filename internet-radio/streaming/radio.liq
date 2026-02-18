@@ -2,24 +2,23 @@
 
 # =============================================
 # RadioWave — Liquidsoap Script
-# Compatible with Liquidsoap 1.4.x (Ubuntu 22.04)
+# Compatible with Liquidsoap 2.x (Ubuntu 26.04)
 # =============================================
 
 # Telnet server for remote control
-set("server.telnet", true)
-set("server.telnet.port", 1234)
-set("server.telnet.bind_addr", "0.0.0.0")
+settings.server.telnet.set(true)
+settings.server.telnet.port.set(1234)
+settings.server.telnet.bind_addr.set("0.0.0.0")
 
 # Logging
-set("log.file.path", "/var/log/liquidsoap/radio.log")
-set("log.level", 3)
+settings.log.file.path.set("/var/log/liquidsoap/radio.log")
+settings.log.level.set(3)
 
 # =============================================
 # Music Sources
 # =============================================
 
 # Main rotation — all music files from /music directory
-# reload every hour, randomize order
 music = playlist(mode="randomize", reload=3600, reload_mode="rounds", "/music")
 
 # Safety fallback — silence if nothing plays
@@ -51,11 +50,19 @@ def on_track_change(m)
   filename = m["filename"]
 
   # Notify backend about track change
-  ignore(server.execute(
-    "curl -s -X POST http://backend:3000/api/stream/now-playing "^
-    "-H 'Content-Type: application/json' "^
-    "-d '{\"title\": \"#{title}\", \"artist\": \"#{artist}\", \"file_path\": \"#{filename}\"}' &"
-  ))
+  ignore(
+    thread.run(
+      fun() -> begin
+        ignore(
+          process.run(
+            "curl -s -X POST http://backend:3000/api/stream/now-playing " ^
+            "-H 'Content-Type: application/json' " ^
+            "-d '{\"title\": \"#{title}\", \"artist\": \"#{artist}\", \"file_path\": \"#{filename}\"}'"
+          )
+        )
+      end
+    )
+  )
 end
 
 # =============================================
