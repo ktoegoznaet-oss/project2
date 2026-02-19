@@ -59,7 +59,7 @@ INSERT INTO chat_messages (user_id, message, is_bot, message_type) VALUES
 ((SELECT id FROM users WHERE username = 'admin'), 'Добро пожаловать на наше радио!', TRUE, 'system'),
 ((SELECT id FROM users WHERE username = 'dj_lover'), 'Привет всем! Классная музыка сегодня!', FALSE, 'text'),
 ((SELECT id FROM users WHERE username = 'music_fan'), 'Можно заказать что-нибудь из попсы?', FALSE, 'text'),
-(NULL, 'DJ Bot: Следующая песня по заказу слушателя dj_lover — "Танцуй со мной"!', TRUE, 'dj');
+(NULL, 'DJ Толик: Следующая песня по заказу слушателя dj_lover — "Танцуй со мной"!', TRUE, 'dj');
 
 -- Test listening stats
 INSERT INTO listening_stats (user_id, song_id, started_at, duration_listened, ip_address)

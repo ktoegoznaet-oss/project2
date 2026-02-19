@@ -64,7 +64,7 @@ export default function Chat() {
           <div key={msg.id || i} className={`rounded-lg px-3 py-2 ${getMessageStyle(msg)}`}>
             <div className="flex items-center gap-2 mb-0.5">
               <span className={`text-xs font-semibold ${msg.role === 'admin' ? 'text-yellow-400' : msg.is_bot ? 'text-brand-400' : 'text-dark-100'}`}>
-                {msg.is_bot ? '🎙 DJ Bot' : msg.username || 'Аноним'}
+                {msg.is_bot ? '🎙 DJ Толик' : msg.username || 'Аноним'}
               </span>
               <span className="text-[10px] text-dark-300">
                 {msg.created_at ? new Date(msg.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : ''}

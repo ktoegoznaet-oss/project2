@@ -18,12 +18,12 @@ export default function DJMessages() {
   return (
     <div className="card">
       <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-        <span className="text-xl">🎙</span> DJ Bot
+        <span className="text-xl">🎙</span> DJ Толик
       </h3>
       <div className="space-y-3">
         {messages.map((msg) => (
           <div key={msg.id} className="bg-brand-600/10 border-l-2 border-brand-500 rounded-r-lg px-4 py-3">
-            <p className="text-sm text-dark-50">{msg.message.replace('🎙 DJ Bot: ', '')}</p>
+            <p className="text-sm text-dark-50">{msg.message.replace('🎙 DJ Толик: ', '')}</p>
             <p className="text-xs text-dark-300 mt-1">
               {new Date(msg.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
             </p>

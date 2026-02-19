@@ -127,7 +127,7 @@ const handleChatMessage = async (ws, data) => {
   // Trigger DJ bot response (non-blocking, with rate limiting)
   if (djBot && message.length > 2) {
     // Respond to ~30% of messages to avoid spam, or always respond to questions
-    const isQuestion = message.includes('?') || message.startsWith('@dj') || message.toLowerCase().includes('бот') || message.toLowerCase().includes('диджей');
+    const isQuestion = message.includes('?') || message.startsWith('@dj') || message.toLowerCase().includes('бот') || message.toLowerCase().includes('диджей') || message.toLowerCase().includes('толик');
     if (isQuestion || Math.random() < 0.3) {
       djBot.generateChatResponse(ws.user.username, message).catch(err => {
         logger.warn('DJ bot chat response error', { error: err.message });

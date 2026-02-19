@@ -23,8 +23,8 @@ const broadcastDJ = (text) => {
   broadcastFn({
     type: 'dj_message',
     id: crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex'),
-    message: `🎙 DJ Bot: ${text}`,
-    username: 'DJ Bot',
+    message: `🎙 DJ Толик: ${text}`,
+    username: 'DJ Толик',
     role: 'bot',
     is_bot: true,
     message_type: 'dj',
@@ -37,7 +37,7 @@ const generateAnnouncement = async (username, songTitle, artist, userMessage) =>
     const prompt = `Ты — энергичный радиоведущий. Слушатель ${username} заказал песню ${artist} - ${songTitle}. Сообщение: ${userMessage || 'без сообщения'}. Сгенерируй короткое (2-3 предложения) объявление для радио. Будь дружелюбным и позитивным. Не используй эмодзи.`;
 
     const text = await chatCompletion([
-      { role: 'system', content: 'Ты — энергичный и позитивный ведущий интернет-радио. Говори по-русски. Коротко и ярко.' },
+      { role: 'system', content: 'Ты — энергичный и позитивный ведущий интернет-радио по имени Толик. Говори по-русски. Коротко и ярко.' },
       { role: 'user', content: prompt },
     ], { max_tokens: 200, temperature: 0.8 });
 
@@ -55,7 +55,7 @@ const generateAnnouncement = async (username, songTitle, artist, userMessage) =>
 
     await query(
       "INSERT INTO chat_messages (message, is_bot, message_type) VALUES ($1, TRUE, 'dj')",
-      [`🎙 DJ Bot: ${text}`]
+      [`🎙 DJ Толик: ${text}`]
     );
 
     broadcastDJ(text);
@@ -81,7 +81,7 @@ const generateChatResponse = async (username, userMessage) => {
     const text = await chatCompletion([
       {
         role: 'system',
-        content: 'Ты — дружелюбный DJ-бот интернет-радио RadioWave. Отвечай по-русски, коротко (1-3 предложения). Ты ведёшь эфир, общаешься со слушателями, рассказываешь о музыке, шутишь. Не используй эмодзи. Если тебя спрашивают о чём-то, что ты не знаешь — отвечай с юмором.',
+        content: 'Ты — дружелюбный DJ по имени Толик, ведущий интернет-радио RadioWave. Отвечай по-русски, коротко (1-3 предложения). Ты ведёшь эфир, общаешься со слушателями, рассказываешь о музыке, шутишь. Не используй эмодзи. Если тебя спрашивают о чём-то, что ты не знаешь — отвечай с юмором. Твоё имя — Толик.',
       },
       ...context,
       { role: 'user', content: `Слушатель ${username} пишет: ${userMessage}` },
@@ -91,7 +91,7 @@ const generateChatResponse = async (username, userMessage) => {
 
     await query(
       "INSERT INTO chat_messages (message, is_bot, message_type) VALUES ($1, TRUE, 'dj')",
-      [`🎙 DJ Bot: ${text}`]
+      [`🎙 DJ Толик: ${text}`]
     );
 
     broadcastDJ(text);
@@ -122,7 +122,7 @@ const generateHourlySummary = async () => {
     const prompt = `Ты — ведущий интернет-радио. Сейчас ${timeStr}. За последний час слушатели заказали ${orderCount} песен. Нас слушают примерно ${listenerCount} человек. Сгенерируй короткую (2-3 предложения) подводку. Не используй эмодзи. Будь позитивным.`;
 
     const text = await chatCompletion([
-      { role: 'system', content: 'Ты — ведущий интернет-радио. Говори по-русски. Коротко и ярко.' },
+      { role: 'system', content: 'Ты — ведущий интернет-радио по имени Толик. Говори по-русски. Коротко и ярко.' },
       { role: 'user', content: prompt },
     ], { max_tokens: 200, temperature: 0.8 });
 
@@ -138,7 +138,7 @@ const generateHourlySummary = async () => {
 
     await query(
       "INSERT INTO chat_messages (message, is_bot, message_type) VALUES ($1, TRUE, 'dj')",
-      [`🎙 DJ Bot: ${text}`]
+      [`🎙 DJ Толик: ${text}`]
     );
 
     broadcastDJ(text);
