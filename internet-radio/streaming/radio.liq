@@ -41,31 +41,6 @@ request_queue = request.queue(id="request_queue")
 jingle_queue = request.queue(id="jingle_queue")
 
 # =============================================
-# Track Change Callback
-# =============================================
-
-def on_track_change(m)
-  title = m["title"]
-  artist = m["artist"]
-  filename = m["filename"]
-
-  # Notify backend about track change
-  ignore(
-    thread.run(
-      fun() -> begin
-        ignore(
-          process.run(
-            "curl -s -X POST http://backend:3000/api/stream/now-playing " ^
-            "-H 'Content-Type: application/json' " ^
-            "-d '{\"title\": \"#{title}\", \"artist\": \"#{artist}\", \"file_path\": \"#{filename}\"}'"
-          )
-        )
-      end
-    )
-  )
-end
-
-# =============================================
 # Build the Main Stream
 # =============================================
 
@@ -82,8 +57,23 @@ main = fallback(
   ]
 )
 
-# Apply on_track callback
-main.on_track(on_track_change)
+# =============================================
+# Track Change Notification
+# =============================================
+
+main.on_track(synchronous=false, fun(m) -> begin
+  title = m["title"]
+  artist = m["artist"]
+  filename = m["filename"]
+
+  ignore(
+    process.run(
+      "curl -s -X POST http://backend:3000/api/stream/now-playing " ^
+      "-H 'Content-Type: application/json' " ^
+      "-d '{\"title\": \"#{title}\", \"artist\": \"#{artist}\", \"file_path\": \"#{filename}\"}'"
+    )
+  )
+end)
 
 # =============================================
 # Audio Processing
