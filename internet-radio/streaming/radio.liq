@@ -83,7 +83,7 @@ main = fallback(
 )
 
 # Apply on_track callback
-main = on_track(main, on_track_change)
+main.on_track(on_track_change)
 
 # =============================================
 # Audio Processing
