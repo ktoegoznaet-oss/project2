@@ -2,7 +2,7 @@
 
 # =============================================
 # RadioWave — Liquidsoap Script
-# Compatible with Liquidsoap 2.x (Ubuntu 26.04)
+# Compatible with Liquidsoap 2.4.0 (Ubuntu 26.04)
 # =============================================
 
 # Telnet server for remote control
@@ -15,37 +15,89 @@ settings.log.file.path.set("/var/log/liquidsoap/radio.log")
 settings.log.level.set(3)
 
 # =============================================
+# Настройки (редактируйте этот раздел)
+# =============================================
+
+# Cooldown: одна и та же песня не будет играть повторно в течение N секунд.
+# 7200 = 2 часа, 3600 = 1 час, 0 = без ограничений
+cooldown = 7200.0
+
+# Трек-заглушка, когда все песни на cooldown.
+# Укажите путь к файлу или оставьте "" для тишины.
+# Пример: default_track = "/music/default.mp3"
+default_track = ""
+
+# =============================================
+# Cooldown-трекер (список недавно сыгранных)
+# =============================================
+
+recently_played = ref([])
+
+def rp_cleanup() =
+  cutoff = time() - cooldown
+  recently_played := list.filter(
+    fun(item) -> snd(item) > cutoff,
+    !recently_played
+  )
+end
+
+def rp_mark(file) =
+  rp_cleanup()
+  recently_played := [(file, time())] @ !recently_played
+end
+
+def rp_was_played(file) =
+  rp_cleanup()
+  list.exists(fun(item) -> fst(item) == file, !recently_played)
+end
+
+# check_next для playlist: пропускает треки, сыгранные недавно
+def can_play(req) =
+  not(rp_was_played(request.uri(req)))
+end
+
+# =============================================
 # Music Sources
 # =============================================
 
-# Main rotation — all music files from /music directory
-music = playlist(mode="randomize", reload=3600, reload_mode="rounds", "/music")
+# Основная ротация с cooldown-фильтром
+music = playlist(
+  mode="randomize",
+  reload=3600,
+  reload_mode="rounds",
+  check_next=can_play,
+  "/music"
+)
 
-# Safety fallback — silence if nothing plays
-safety = blank(id="silence")
-
-# Make music safe (won't crash if /music is empty)
-music = mksafe(music)
+# Fallback когда все треки на cooldown
+music_safe = if default_track != "" then
+  fallback(
+    synchronous=false,
+    [music, single(id="default_track", default_track), blank(id="cooldown_silence")]
+  )
+else
+  fallback(synchronous=false, [music, blank(id="cooldown_silence")])
+end
 
 # =============================================
 # Request Queues
 # =============================================
 
-# Priority queue (for premium/VIP users)
+# Приоритетная очередь (premium/VIP)
 priority_queue = request.queue(id="priority_queue")
 
-# Regular request queue (for song orders)
+# Обычная очередь заказов
 request_queue = request.queue(id="request_queue")
 
-# Jingle queue (for DJ bot announcements)
+# Очередь джинглов (DJ-бот)
 jingle_queue = request.queue(id="jingle_queue")
 
 # =============================================
 # Build the Main Stream
 # =============================================
 
-# Priority: jingle → priority_queue → request_queue → music rotation
-# synchronous=false required in Liquidsoap 2.4.0 (Ubuntu 26.04)
+# Приоритет: jingle → priority_queue → request_queue → music
+# synchronous=false обязателен в Liquidsoap 2.4.0
 main = fallback(
   id="main",
   track_sensitive=true,
@@ -54,19 +106,23 @@ main = fallback(
     jingle_queue,
     priority_queue,
     request_queue,
-    music,
-    safety
+    music_safe
   ]
 )
 
 # =============================================
-# Track Change Notification
+# Track Change Notification + Cooldown update
 # =============================================
 
 main.on_track(synchronous=false, fun(m) -> begin
   title = m["title"]
   artist = m["artist"]
   filename = m["filename"]
+
+  # Отмечаем трек как недавно сыгранный
+  if filename != "" then
+    rp_mark(filename)
+  end
 
   ignore(
     process.run(
@@ -81,7 +137,6 @@ end)
 # Audio Processing
 # =============================================
 
-# Normalize volume
 main = normalize(main)
 
 # =============================================

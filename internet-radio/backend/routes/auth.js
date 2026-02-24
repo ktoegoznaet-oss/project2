@@ -86,4 +86,59 @@ router.get('/me', auth, async (req, res) => {
   res.json({ user: req.user });
 });
 
+// Пользователь меняет свои данные (ник, email, пароль)
+router.put('/profile', auth, async (req, res, next) => {
+  try {
+    const { username, email, new_password, current_password } = req.body;
+    const userId = req.user.id;
+    const updates = [];
+    const params = [];
+    let paramIdx = 1;
+
+    if (username) {
+      const clean = sanitizeInput(username);
+      if (clean.length < 3 || clean.length > 50)
+        return res.status(400).json({ error: 'Username от 3 до 50 символов' });
+      const ex = await query('SELECT id FROM users WHERE username = $1 AND id != $2', [clean, userId]);
+      if (ex.rows.length > 0) return res.status(409).json({ error: 'Username уже занят' });
+      updates.push(`username = $${paramIdx++}`);
+      params.push(clean);
+    }
+
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) return res.status(400).json({ error: 'Некорректный email' });
+      const ex = await query('SELECT id FROM users WHERE email = $1 AND id != $2', [email.toLowerCase(), userId]);
+      if (ex.rows.length > 0) return res.status(409).json({ error: 'Email уже занят' });
+      updates.push(`email = $${paramIdx++}`);
+      params.push(email.toLowerCase());
+    }
+
+    if (new_password) {
+      if (new_password.length < 6)
+        return res.status(400).json({ error: 'Новый пароль минимум 6 символов' });
+      if (!current_password)
+        return res.status(400).json({ error: 'Укажите текущий пароль' });
+      const userRow = await query('SELECT password_hash FROM users WHERE id = $1', [userId]);
+      const valid = await bcrypt.compare(current_password, userRow.rows[0].password_hash);
+      if (!valid) return res.status(401).json({ error: 'Неверный текущий пароль' });
+      const hash = await bcrypt.hash(new_password, 12);
+      updates.push(`password_hash = $${paramIdx++}`);
+      params.push(hash);
+    }
+
+    if (updates.length === 0) return res.status(400).json({ error: 'Нечего обновлять' });
+
+    params.push(userId);
+    const result = await query(
+      `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramIdx}
+       RETURNING id, username, email, role, balance, subscription_type`,
+      params
+    );
+    res.json({ user: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

@@ -5,6 +5,7 @@ import { api } from '../../lib/api';
 import useAuth from '../../hooks/useAuth';
 import AuthGuard from '../../components/AuthGuard';
 import BalanceWidget from '../../components/BalanceWidget';
+import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
   return (
@@ -15,7 +16,7 @@ export default function ProfilePage() {
 }
 
 function ProfileContent() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [orders, setOrders] = useState({ song_orders: [], custom_orders: [] });
   const [subscription, setSubscription] = useState(null);
   const [payments, setPayments] = useState([]);
@@ -68,14 +69,14 @@ function ProfileContent() {
         </div>
 
         <div className="lg:col-span-2">
-          <div className="flex gap-2 mb-6">
-            {['orders', 'custom', 'payments'].map(t => (
+          <div className="flex gap-2 mb-6 flex-wrap">
+            {[['orders', 'Заказы песен'], ['custom', 'Кастомные песни'], ['payments', 'Платежи'], ['settings', 'Настройки']].map(([t, label]) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
                 className={`py-2 px-4 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-brand-600 text-white' : 'bg-dark-600 text-dark-200 hover:bg-dark-500'}`}
               >
-                {t === 'orders' ? 'Заказы песен' : t === 'custom' ? 'Кастомные песни' : 'Платежи'}
+                {label}
               </button>
             ))}
           </div>
@@ -143,8 +144,128 @@ function ProfileContent() {
               ))}
             </div>
           )}
+
+          {tab === 'settings' && (
+            <SettingsTab user={user} refreshUser={refreshUser} />
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+function SettingsTab({ user, refreshUser }) {
+  const [form, setForm] = useState({ username: '', email: '', current_password: '', new_password: '', confirm_password: '' });
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const body = {};
+    if (form.username.trim()) body.username = form.username.trim();
+    if (form.email.trim()) body.email = form.email.trim();
+    if (form.new_password) {
+      if (form.new_password !== form.confirm_password) {
+        toast.error('Новый пароль и подтверждение не совпадают');
+        return;
+      }
+      if (!form.current_password) {
+        toast.error('Введите текущий пароль');
+        return;
+      }
+      body.new_password = form.new_password;
+      body.current_password = form.current_password;
+    }
+
+    if (!Object.keys(body).length) {
+      toast.error('Нечего сохранять');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await api.auth.updateProfile(body);
+      await refreshUser();
+      toast.success('Настройки сохранены');
+      setForm({ username: '', email: '', current_password: '', new_password: '', confirm_password: '' });
+    } catch (err) {
+      toast.error(err.message || 'Ошибка сохранения');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="card space-y-5">
+      <h3 className="text-lg font-semibold text-white">Настройки профиля</h3>
+      <p className="text-xs text-dark-400">Заполните только те поля, которые хотите изменить</p>
+
+      <div>
+        <label className="block text-sm text-dark-200 mb-1">Новый username</label>
+        <input
+          type="text"
+          placeholder={user?.username || 'Без изменений'}
+          value={form.username}
+          onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
+          className="input w-full"
+          minLength={3}
+          maxLength={50}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm text-dark-200 mb-1">Новый email</label>
+        <input
+          type="email"
+          placeholder={user?.email || 'Без изменений'}
+          value={form.email}
+          onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+          className="input w-full"
+        />
+      </div>
+
+      <div className="border-t border-dark-400 pt-5 space-y-4">
+        <p className="text-sm text-dark-300 font-medium">Смена пароля</p>
+        <div>
+          <label className="block text-sm text-dark-200 mb-1">Текущий пароль</label>
+          <input
+            type="password"
+            placeholder="Требуется для смены пароля"
+            value={form.current_password}
+            onChange={e => setForm(p => ({ ...p, current_password: e.target.value }))}
+            className="input w-full"
+          />
+        </div>
+        <div>
+          <label className="block text-sm text-dark-200 mb-1">Новый пароль</label>
+          <input
+            type="password"
+            placeholder="Минимум 6 символов"
+            value={form.new_password}
+            onChange={e => setForm(p => ({ ...p, new_password: e.target.value }))}
+            className="input w-full"
+            minLength={6}
+          />
+        </div>
+        <div>
+          <label className="block text-sm text-dark-200 mb-1">Подтвердите новый пароль</label>
+          <input
+            type="password"
+            placeholder="Повторите новый пароль"
+            value={form.confirm_password}
+            onChange={e => setForm(p => ({ ...p, confirm_password: e.target.value }))}
+            className="input w-full"
+          />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={saving}
+        className="btn-primary w-full py-2.5 text-sm disabled:opacity-50"
+      >
+        {saving ? 'Сохранение...' : 'Сохранить изменения'}
+      </button>
+    </form>
   );
 }

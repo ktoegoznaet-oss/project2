@@ -54,6 +54,7 @@ export const api = {
     register: (body) => request('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
     login: (body) => request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
     me: () => request('/auth/me'),
+    updateProfile: (body) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(body) }),
   },
   songs: {
     list: (params = {}) => {
@@ -104,10 +105,12 @@ export const api = {
       return request(`/admin/song-orders?${qs}`);
     },
     users: () => request('/admin/users'),
+    createUser: (body) => request('/admin/users', { method: 'POST', body: JSON.stringify(body) }),
     updateUser: (id, body) => request(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
     deleteUser: (id) => request(`/admin/users/${id}`, { method: 'DELETE' }),
     songs: () => request('/admin/songs'),
     deleteSong: (id) => request(`/admin/songs/${id}`, { method: 'DELETE' }),
+    bulkDeleteSongs: (ids) => request('/admin/songs/bulk-delete', { method: 'POST', body: JSON.stringify({ ids }) }),
     stats: (params = {}) => {
       const qs = new URLSearchParams(params).toString();
       return request(`/admin/stats?${qs}`);

@@ -59,6 +59,9 @@ router.post('/now-playing', async (req, res, next) => {
       );
     }
 
+    // Закрываем предыдущие «играет» → «проиграна»
+    await query("UPDATE song_orders SET status = 'played' WHERE status = 'playing'");
+
     const pendingOrders = await query(
       "SELECT so.id FROM song_orders so WHERE so.status = 'queued' AND so.song_id = $1 ORDER BY so.created_at LIMIT 1",
       [song?.id]

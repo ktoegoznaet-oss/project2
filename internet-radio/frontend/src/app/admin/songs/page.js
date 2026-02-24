@@ -20,9 +20,12 @@ function SongsManager() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [deleting, setDeleting] = useState(null);
+  const [selected, setSelected] = useState(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const loadSongs = () => {
     setLoading(true);
+    setSelected(new Set());
     api.admin.songs()
       .then(data => setSongs(data.songs || []))
       .catch(() => toast.error('Ошибка загрузки песен'))
@@ -38,6 +41,7 @@ function SongsManager() {
       await api.admin.deleteSong(songId);
       toast.success('Песня удалена');
       setSongs(prev => prev.filter(s => s.id !== songId));
+      setSelected(prev => { const n = new Set(prev); n.delete(songId); return n; });
     } catch (err) {
       toast.error(err.message || 'Ошибка удаления');
     } finally {
@@ -50,6 +54,48 @@ function SongsManager() {
     const q = search.toLowerCase();
     return s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q) || (s.genre || '').toLowerCase().includes(q);
   });
+
+  const allFilteredSelected = filtered.length > 0 && filtered.every(s => selected.has(s.id));
+
+  const toggleSelectAll = () => {
+    if (allFilteredSelected) {
+      setSelected(prev => {
+        const n = new Set(prev);
+        filtered.forEach(s => n.delete(s.id));
+        return n;
+      });
+    } else {
+      setSelected(prev => {
+        const n = new Set(prev);
+        filtered.forEach(s => n.add(s.id));
+        return n;
+      });
+    }
+  };
+
+  const toggleOne = (id) => {
+    setSelected(prev => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = [...selected];
+    if (!confirm(`Удалить ${ids.length} песен? Все связанные заказы тоже будут удалены.`)) return;
+    setBulkDeleting(true);
+    try {
+      await api.admin.bulkDeleteSongs(ids);
+      toast.success(`Удалено ${ids.length} песен`);
+      setSongs(prev => prev.filter(s => !ids.includes(s.id)));
+      setSelected(new Set());
+    } catch (err) {
+      toast.error(err.message || 'Ошибка массового удаления');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -76,7 +122,7 @@ function SongsManager() {
         </div>
       </div>
 
-      <div className="relative mb-6">
+      <div className="relative mb-4">
         <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-300" />
         <input
           type="text"
@@ -87,10 +133,41 @@ function SongsManager() {
         />
       </div>
 
+      {/* Bulk action bar */}
+      {selected.size > 0 && (
+        <div className="flex items-center justify-between bg-brand-600/10 border border-brand-600/30 rounded-xl px-4 py-3 mb-4">
+          <span className="text-brand-300 text-sm font-medium">Выбрано: {selected.size}</span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSelected(new Set())}
+              className="text-dark-300 hover:text-white text-sm transition"
+            >
+              Снять выделение
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+              className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 border border-red-600/30 bg-red-600/10 hover:bg-red-600/20 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+            >
+              <HiTrash size={14} />
+              {bulkDeleting ? 'Удаление...' : `Удалить ${selected.size}`}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-dark-300 border-b border-dark-400">
+              <th className="py-3 px-3 w-10">
+                <input
+                  type="checkbox"
+                  checked={allFilteredSelected}
+                  onChange={toggleSelectAll}
+                  className="rounded border-dark-400 bg-dark-600 text-brand-600 focus:ring-brand-500 focus:ring-offset-dark-700 cursor-pointer"
+                />
+              </th>
               <th className="text-left py-3 px-3 font-medium">Песня</th>
               <th className="text-left py-3 px-3 font-medium">Жанр</th>
               <th className="text-right py-3 px-3 font-medium">Цена заказа</th>
@@ -102,7 +179,18 @@ function SongsManager() {
           </thead>
           <tbody>
             {filtered.map(song => (
-              <tr key={song.id} className="border-b border-dark-500/50 hover:bg-dark-500/30 transition">
+              <tr
+                key={song.id}
+                className={`border-b border-dark-500/50 hover:bg-dark-500/30 transition ${selected.has(song.id) ? 'bg-brand-600/5' : ''}`}
+              >
+                <td className="py-3 px-3">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(song.id)}
+                    onChange={() => toggleOne(song.id)}
+                    className="rounded border-dark-400 bg-dark-600 text-brand-600 focus:ring-brand-500 focus:ring-offset-dark-700 cursor-pointer"
+                  />
+                </td>
                 <td className="py-3 px-3">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-brand-600/20 rounded flex items-center justify-center">

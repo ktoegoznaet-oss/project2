@@ -5,7 +5,7 @@ import { api } from '../../../lib/api';
 import AuthGuard from '../../../components/AuthGuard';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { HiArrowLeft, HiSearch, HiShieldCheck, HiUser, HiMail, HiCurrencyDollar, HiCalendar, HiRefresh, HiTrash } from 'react-icons/hi';
+import { HiArrowLeft, HiSearch, HiShieldCheck, HiRefresh, HiTrash, HiPlus } from 'react-icons/hi';
 
 export default function AdminUsersPage() {
   return (
@@ -22,6 +22,7 @@ function UsersManager() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);
   const [updatingRole, setUpdatingRole] = useState(null);
+  const [showCreate, setShowCreate] = useState(false);
 
   const loadUsers = () => {
     setLoading(true);
@@ -68,6 +69,20 @@ function UsersManager() {
     }
   };
 
+  const handleCredentialsChange = async (userId, fields) => {
+    try {
+      await api.admin.updateUser(userId, fields);
+      toast.success('Данные обновлены');
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, ...fields } : u));
+      if (selectedUser?.id === userId) {
+        setSelectedUser(prev => ({ ...prev, ...fields }));
+      }
+    } catch (err) {
+      toast.error(err.message || 'Ошибка обновления');
+      throw err;
+    }
+  };
+
   const handleDeleteUser = async (userId) => {
     if (!confirm('Вы уверены? Будут удалены все заказы, платежи и сообщения пользователя.')) return;
     try {
@@ -77,6 +92,18 @@ function UsersManager() {
       setSelectedUser(null);
     } catch (err) {
       toast.error(err.message || 'Ошибка удаления');
+    }
+  };
+
+  const handleCreateUser = async (fields) => {
+    try {
+      const data = await api.admin.createUser(fields);
+      toast.success('Пользователь создан');
+      setUsers(prev => [data.user, ...prev]);
+      setShowCreate(false);
+    } catch (err) {
+      toast.error(err.message || 'Ошибка создания');
+      throw err;
     }
   };
 
@@ -119,9 +146,17 @@ function UsersManager() {
           </Link>
           <h1 className="text-2xl font-bold text-white">Пользователи ({users.length})</h1>
         </div>
-        <button onClick={loadUsers} className="btn-secondary text-sm py-2 px-3 flex items-center gap-2">
-          <HiRefresh /> Обновить
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowCreate(true)}
+            className="btn-primary text-sm py-2 px-4 flex items-center gap-2"
+          >
+            <HiPlus size={16} /> Создать
+          </button>
+          <button onClick={loadUsers} className="btn-secondary text-sm py-2 px-3 flex items-center gap-2">
+            <HiRefresh /> Обновить
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -221,16 +256,45 @@ function UsersManager() {
           onClose={() => setSelectedUser(null)}
           onRoleChange={handleRoleChange}
           onBalanceChange={handleBalanceChange}
+          onCredentialsChange={handleCredentialsChange}
           onDelete={handleDeleteUser}
           updatingRole={updatingRole}
+        />
+      )}
+
+      {/* Create user modal */}
+      {showCreate && (
+        <CreateUserModal
+          onClose={() => setShowCreate(false)}
+          onCreate={handleCreateUser}
         />
       )}
     </div>
   );
 }
 
-function UserModal({ user, onClose, onRoleChange, onBalanceChange, onDelete, updatingRole }) {
+function UserModal({ user, onClose, onRoleChange, onBalanceChange, onCredentialsChange, onDelete, updatingRole }) {
   const [balanceAmount, setBalanceAmount] = useState('');
+  const [credTab, setCredTab] = useState('role'); // 'role' | 'credentials'
+  const [credForm, setCredForm] = useState({ username: '', email: '', password: '' });
+  const [savingCreds, setSavingCreds] = useState(false);
+
+  const handleSaveCreds = async () => {
+    const fields = {};
+    if (credForm.username.trim()) fields.username = credForm.username.trim();
+    if (credForm.email.trim()) fields.email = credForm.email.trim();
+    if (credForm.password) fields.password = credForm.password;
+    if (!Object.keys(fields).length) return;
+    setSavingCreds(true);
+    try {
+      await onCredentialsChange(user.id, fields);
+      setCredForm({ username: '', email: '', password: '' });
+    } catch (_) {
+      // error already toasted
+    } finally {
+      setSavingCreds(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
@@ -264,54 +328,114 @@ function UserModal({ user, onClose, onRoleChange, onBalanceChange, onDelete, upd
           </div>
         </div>
 
-        {/* Role change */}
-        <div className="mb-6">
-          <label className="block text-sm text-dark-200 mb-2">Роль пользователя</label>
-          <div className="flex gap-2">
-            {['user', 'moderator', 'admin'].map(role => (
-              <button
-                key={role}
-                onClick={() => onRoleChange(user.id, role)}
-                disabled={user.role === role || updatingRole === user.id}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition border ${
-                  user.role === role
-                    ? 'bg-brand-600 border-brand-500 text-white'
-                    : 'bg-dark-500/50 border-dark-400 text-dark-200 hover:bg-dark-400 hover:text-white'
-                } ${updatingRole === user.id ? 'opacity-50 cursor-wait' : ''}`}
-              >
-                {role === 'admin' && <HiShieldCheck className="inline mr-1" />}
-                {role}
-              </button>
-            ))}
-          </div>
+        {/* Tabs */}
+        <div className="flex gap-1 mb-5 bg-dark-500/50 rounded-xl p-1">
+          {[['role', 'Роль и баланс'], ['credentials', 'Данные входа']].map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setCredTab(key)}
+              className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition ${credTab === key ? 'bg-dark-600 text-white shadow' : 'text-dark-300 hover:text-white'}`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
-        {/* Balance management */}
-        <div className="mb-6">
-          <label className="block text-sm text-dark-200 mb-2">Управление балансом</label>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              placeholder="Сумма (₽)"
-              value={balanceAmount}
-              onChange={(e) => setBalanceAmount(e.target.value)}
-              className="input flex-1"
-            />
+        {credTab === 'role' && (
+          <>
+            {/* Role change */}
+            <div className="mb-6">
+              <label className="block text-sm text-dark-200 mb-2">Роль пользователя</label>
+              <div className="flex gap-2">
+                {['user', 'moderator', 'admin'].map(role => (
+                  <button
+                    key={role}
+                    onClick={() => onRoleChange(user.id, role)}
+                    disabled={user.role === role || updatingRole === user.id}
+                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition border ${
+                      user.role === role
+                        ? 'bg-brand-600 border-brand-500 text-white'
+                        : 'bg-dark-500/50 border-dark-400 text-dark-200 hover:bg-dark-400 hover:text-white'
+                    } ${updatingRole === user.id ? 'opacity-50 cursor-wait' : ''}`}
+                  >
+                    {role === 'admin' && <HiShieldCheck className="inline mr-1" />}
+                    {role}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Balance management */}
+            <div className="mb-6">
+              <label className="block text-sm text-dark-200 mb-2">Управление балансом</label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="Сумма (₽)"
+                  value={balanceAmount}
+                  onChange={(e) => setBalanceAmount(e.target.value)}
+                  className="input flex-1"
+                />
+                <button
+                  onClick={() => {
+                    if (balanceAmount && parseFloat(balanceAmount) !== 0) {
+                      onBalanceChange(user.id, balanceAmount);
+                      setBalanceAmount('');
+                    }
+                  }}
+                  disabled={!balanceAmount || parseFloat(balanceAmount) === 0}
+                  className="btn-primary text-sm py-2 px-4"
+                >
+                  {parseFloat(balanceAmount || 0) >= 0 ? 'Начислить' : 'Списать'}
+                </button>
+              </div>
+              <p className="text-xs text-dark-400 mt-1">Положительное число — начисление, отрицательное — списание</p>
+            </div>
+          </>
+        )}
+
+        {credTab === 'credentials' && (
+          <div className="mb-6 space-y-3">
+            <p className="text-xs text-dark-400 mb-3">Заполните только те поля, которые нужно изменить</p>
+            <div>
+              <label className="block text-xs text-dark-300 mb-1">Новый username</label>
+              <input
+                type="text"
+                placeholder={user.username}
+                value={credForm.username}
+                onChange={e => setCredForm(p => ({ ...p, username: e.target.value }))}
+                className="input w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-dark-300 mb-1">Новый email</label>
+              <input
+                type="email"
+                placeholder={user.email}
+                value={credForm.email}
+                onChange={e => setCredForm(p => ({ ...p, email: e.target.value }))}
+                className="input w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-dark-300 mb-1">Новый пароль</label>
+              <input
+                type="password"
+                placeholder="Оставьте пустым, если не меняете"
+                value={credForm.password}
+                onChange={e => setCredForm(p => ({ ...p, password: e.target.value }))}
+                className="input w-full"
+              />
+            </div>
             <button
-              onClick={() => {
-                if (balanceAmount && parseFloat(balanceAmount) !== 0) {
-                  onBalanceChange(user.id, balanceAmount);
-                  setBalanceAmount('');
-                }
-              }}
-              disabled={!balanceAmount || parseFloat(balanceAmount) === 0}
-              className="btn-primary text-sm py-2 px-4"
+              onClick={handleSaveCreds}
+              disabled={savingCreds || (!credForm.username.trim() && !credForm.email.trim() && !credForm.password)}
+              className="btn-primary w-full text-sm py-2 disabled:opacity-50"
             >
-              {parseFloat(balanceAmount || 0) >= 0 ? 'Начислить' : 'Списать'}
+              {savingCreds ? 'Сохранение...' : 'Сохранить изменения'}
             </button>
           </div>
-          <p className="text-xs text-dark-400 mt-1">Положительное число — начисление, отрицательное — списание</p>
-        </div>
+        )}
 
         {/* Delete button */}
         <div className="mb-4">
@@ -330,6 +454,89 @@ function UserModal({ user, onClose, onRoleChange, onBalanceChange, onDelete, upd
           <p>Последняя активность: {user.last_active ? new Date(user.last_active).toLocaleString('ru-RU') : '—'}</p>
           {user.subscription_expires && <p>Подписка до: {new Date(user.subscription_expires).toLocaleString('ru-RU')}</p>}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function CreateUserModal({ onClose, onCreate }) {
+  const [form, setForm] = useState({ username: '', email: '', password: '', role: 'user' });
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await onCreate(form);
+    } catch (_) {
+      // error already toasted
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-dark-600 border border-dark-400 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">Создать пользователя</h2>
+          <button onClick={onClose} className="text-dark-300 hover:text-white text-2xl">&times;</button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm text-dark-200 mb-1">Username</label>
+            <input
+              type="text"
+              required
+              value={form.username}
+              onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
+              className="input w-full"
+              placeholder="Минимум 3 символа"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-dark-200 mb-1">Email</label>
+            <input
+              type="email"
+              required
+              value={form.email}
+              onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+              className="input w-full"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-dark-200 mb-1">Пароль</label>
+            <input
+              type="password"
+              required
+              value={form.password}
+              onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+              className="input w-full"
+              placeholder="Минимум 6 символов"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-dark-200 mb-1">Роль</label>
+            <select
+              value={form.role}
+              onChange={e => setForm(p => ({ ...p, role: e.target.value }))}
+              className="input w-full"
+            >
+              <option value="user">user</option>
+              <option value="moderator">moderator</option>
+              <option value="admin">admin</option>
+            </select>
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 text-sm py-2">
+              Отмена
+            </button>
+            <button type="submit" disabled={saving} className="btn-primary flex-1 text-sm py-2 disabled:opacity-50">
+              {saving ? 'Создание...' : 'Создать'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

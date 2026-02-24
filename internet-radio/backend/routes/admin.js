@@ -1,8 +1,10 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const { query } = require('../config/database');
 const { auth } = require('../middleware/auth');
 const adminOnly = require('../middleware/adminOnly');
 const statsAgent = require('../services/statsAgent');
+const { sanitizeInput } = require('../utils/helpers');
 const logger = require('../utils/logger');
 const router = express.Router();
 
@@ -158,10 +160,47 @@ router.get('/users', auth, adminOnly, async (req, res, next) => {
   }
 });
 
+// Создать нового пользователя (только админ)
+router.post('/users', auth, adminOnly, async (req, res, next) => {
+  try {
+    const { username, email, password, role = 'user' } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'Заполните username, email, password' });
+    }
+    const cleanUsername = sanitizeInput(username);
+    if (cleanUsername.length < 3) return res.status(400).json({ error: 'Username минимум 3 символа' });
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return res.status(400).json({ error: 'Некорректный email' });
+
+    if (password.length < 6) return res.status(400).json({ error: 'Пароль минимум 6 символов' });
+
+    const validRoles = ['user', 'moderator', 'admin'];
+    if (!validRoles.includes(role)) return res.status(400).json({ error: 'Неверная роль' });
+
+    const existing = await query('SELECT id FROM users WHERE email = $1 OR username = $2', [email.toLowerCase(), cleanUsername]);
+    if (existing.rows.length > 0) return res.status(409).json({ error: 'Email или username уже занят' });
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const result = await query(
+      `INSERT INTO users (username, email, password_hash, role)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, username, email, role, balance, subscription_type, created_at, last_active`,
+      [cleanUsername, email.toLowerCase(), passwordHash, role]
+    );
+
+    logger.info('User created by admin', { userId: result.rows[0].id, username: cleanUsername });
+    res.status(201).json({ user: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.put('/users/:id', auth, adminOnly, async (req, res, next) => {
   try {
     const userId = req.params.id;
-    const { role, balance_add } = req.body;
+    const { role, balance_add, username, email, password } = req.body;
     const updates = [];
     const params = [];
     let paramIdx = 1;
@@ -177,11 +216,34 @@ router.put('/users/:id', auth, adminOnly, async (req, res, next) => {
 
     if (balance_add !== undefined && balance_add !== null) {
       const amount = parseFloat(balance_add);
-      if (isNaN(amount)) {
-        return res.status(400).json({ error: 'Неверная сумма' });
-      }
+      if (isNaN(amount)) return res.status(400).json({ error: 'Неверная сумма' });
       updates.push(`balance = balance + $${paramIdx++}`);
       params.push(amount);
+    }
+
+    if (username) {
+      const clean = sanitizeInput(username);
+      if (clean.length < 3) return res.status(400).json({ error: 'Username минимум 3 символа' });
+      const ex = await query('SELECT id FROM users WHERE username = $1 AND id != $2', [clean, userId]);
+      if (ex.rows.length > 0) return res.status(409).json({ error: 'Username уже занят' });
+      updates.push(`username = $${paramIdx++}`);
+      params.push(clean);
+    }
+
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) return res.status(400).json({ error: 'Некорректный email' });
+      const ex = await query('SELECT id FROM users WHERE email = $1 AND id != $2', [email.toLowerCase(), userId]);
+      if (ex.rows.length > 0) return res.status(409).json({ error: 'Email уже занят' });
+      updates.push(`email = $${paramIdx++}`);
+      params.push(email.toLowerCase());
+    }
+
+    if (password) {
+      if (password.length < 6) return res.status(400).json({ error: 'Пароль минимум 6 символов' });
+      const hash = await bcrypt.hash(password, 12);
+      updates.push(`password_hash = $${paramIdx++}`);
+      params.push(hash);
     }
 
     if (updates.length === 0) {
@@ -198,7 +260,7 @@ router.put('/users/:id', auth, adminOnly, async (req, res, next) => {
       return res.status(404).json({ error: 'Пользователь не найден' });
     }
 
-    logger.info('User updated by admin', { userId, role, balance_add });
+    logger.info('User updated by admin', { userId, changes: Object.keys(req.body) });
     res.json({ user: result.rows[0] });
   } catch (err) {
     next(err);
@@ -228,6 +290,25 @@ router.delete('/users/:id', auth, adminOnly, async (req, res, next) => {
 
     logger.info('User deleted by admin', { userId, username: result.rows[0].username });
     res.json({ message: 'Пользователь удалён', user: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Массовое удаление песен
+router.post('/songs/bulk-delete', auth, adminOnly, async (req, res, next) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'Укажите массив ids' });
+    }
+    // Параметрически безопасный IN-список
+    const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
+    await query(`DELETE FROM song_orders WHERE song_id IN (${placeholders})`, ids);
+    await query(`DELETE FROM listening_stats WHERE song_id IN (${placeholders})`, ids);
+    const result = await query(`DELETE FROM songs WHERE id IN (${placeholders}) RETURNING id`, ids);
+    logger.info('Bulk songs deleted by admin', { count: result.rows.length });
+    res.json({ deleted: result.rows.length });
   } catch (err) {
     next(err);
   }
