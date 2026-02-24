@@ -45,9 +45,11 @@ jingle_queue = request.queue(id="jingle_queue")
 # =============================================
 
 # Priority: jingle → priority_queue → request_queue → music rotation
+# synchronous=false required in Liquidsoap 2.4.0 (Ubuntu 26.04)
 main = fallback(
   id="main",
   track_sensitive=true,
+  synchronous=false,
   [
     jingle_queue,
     priority_queue,
