@@ -109,7 +109,7 @@ main = fallback(
 # Track Change Notification + Cooldown update
 # =============================================
 
-main.on_track(fun(m) -> begin
+main.on_track(synchronous=false, fun(m) -> begin
   title = m["title"]
   artist = m["artist"]
   filename = m["filename"]
