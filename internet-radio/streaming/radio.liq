@@ -35,20 +35,20 @@ recently_played = ref([])
 
 def rp_cleanup() =
   cutoff = time() - cooldown
-  recently_played := list.filter(
+  recently_played.set(list.filter(
     fun(item) -> snd(item) > cutoff,
-    !recently_played
-  )
+    recently_played()
+  ))
 end
 
 def rp_mark(file) =
   rp_cleanup()
-  recently_played := [(file, time())] @ !recently_played
+  recently_played.set(list.append([(file, time())], recently_played()))
 end
 
 def rp_was_played(file) =
   rp_cleanup()
-  list.exists(fun(item) -> fst(item) == file, !recently_played)
+  list.exists(fun(item) -> fst(item) == file, recently_played())
 end
 
 # check_next для playlist: пропускает треки, сыгранные недавно
