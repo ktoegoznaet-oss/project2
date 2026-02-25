@@ -41,14 +41,14 @@ def rp_cleanup() =
   ))
 end
 
-def rp_mark(file) =
+def rp_mark(fpath) =
   rp_cleanup()
-  recently_played.set(list.append([(file, time())], recently_played()))
+  recently_played.set(list.append([(fpath, time())], recently_played()))
 end
 
-def rp_was_played(file) =
+def rp_was_played(fpath) =
   rp_cleanup()
-  list.exists(fun(item) -> fst(item) == file, recently_played())
+  list.exists(fun(item) -> fst(item) == fpath, recently_played())
 end
 
 # check_next для playlist: пропускает треки, сыгранные недавно
@@ -71,12 +71,9 @@ music = playlist(
 
 # Fallback когда все треки на cooldown
 music_safe = if default_track != "" then
-  fallback(
-    synchronous=false,
-    [music, single(id="default_track", default_track), blank(id="cooldown_silence")]
-  )
+  fallback([music, single(id="default_track", default_track), blank(id="cooldown_silence")])
 else
-  fallback(synchronous=false, [music, blank(id="cooldown_silence")])
+  fallback([music, blank(id="cooldown_silence")])
 end
 
 # =============================================
@@ -97,11 +94,9 @@ jingle_queue = request.queue(id="jingle_queue")
 # =============================================
 
 # Приоритет: jingle → priority_queue → request_queue → music
-# synchronous=false обязателен в Liquidsoap 2.4.0
 main = fallback(
   id="main",
   track_sensitive=true,
-  synchronous=false,
   [
     jingle_queue,
     priority_queue,
@@ -114,7 +109,7 @@ main = fallback(
 # Track Change Notification + Cooldown update
 # =============================================
 
-main.on_track(synchronous=false, fun(m) -> begin
+main.on_track(fun(m) -> begin
   title = m["title"]
   artist = m["artist"]
   filename = m["filename"]
